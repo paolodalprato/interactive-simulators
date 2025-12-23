@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2D Gravity Simulator</title>
+    <meta name="description" content="Interactive simulator to explore gravitational attraction between bodies and observe emergent behavior from simple physical rules">
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #0a0a0a;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const GravitySimulator = () => {
+          const canvasRef = useRef(null);
+          const [particles, setParticles] = useState([]);
+          const [isRunning, setIsRunning] = useState(false);
+          const [language, setLanguage] = useState('en');
+          const animationRef = useRef(null);
+          
+          // Parametri configurabili
+          const [numParticles, setNumParticles] = useState(100);
+          const [initialVelocity, setInitialVelocity] = useState(0.5);
+          const [gravitationalConstant, setGravitationalConstant] = useState(100);
+          
+          const canvasWidth = 800;
+          const canvasHeight = 600;
+          
+          // Testi bilingui
+          const texts = {
+            it: {
+              title: "Simulatore gravità 2D",
+              subtitle: "Esplora l'attrazione gravitazionale tra particelle",
+              description: "Questo simulatore mostra come le particelle interagiscono attraverso la forza di gravità. Le particelle si attraggono secondo la legge di Newton (F = G·m₁·m₂/r²) e si fondono quando collidono, conservando massa e quantità di moto.",
+              concept: "Concetti chiave",
+              concept1: "Legge di gravitazione universale: la forza è proporzionale al prodotto delle masse e inversamente proporzionale al quadrato della distanza",
+              concept2: "Comportamento emergente: strutture complesse (ammassi) emergono da regole semplici",
+              concept3: "Conservazione della quantità di moto: nelle collisioni, la massa totale e il momento si conservano",
+              tryThis: "Prova questo",
+              try1: "Aumenta G a 300-400: le particelle formano rapidamente ammassi compatti",
+              try2: "Riduci G a 20-30: osserva movimenti più lenti e aggregazione graduale",
+              try3: "Parti con poche particelle (20-30) per seguire meglio le interazioni individuali",
+              controls: "Controlli",
+              numParticles: "Numero particelle",
+              initialVel: "Velocità iniziale",
+              gravConstant: "Costante G",
+              start: "Avvia",
+              pause: "Pausa",
+              reset: "Reset",
+              activeParticles: "Particelle attive",
+              legend: "Legenda colori",
+              legendDesc: "Il colore indica la massa: rosso (piccola) → arancione → giallo → verde → blu → violetto (grande)",
+              credits: "Creato da",
+              scientificNote: "Nota: questo è un modello semplificato per scopi didattici. I sistemi gravitazionali reali seguono le stesse leggi ma con scale e complessità molto maggiori."
+            },
+            en: {
+              title: "2D gravity simulator",
+              subtitle: "Explore gravitational attraction between particles",
+              description: "This simulator shows how particles interact through gravitational force. Particles attract each other following Newton's law (F = G·m₁·m₂/r²) and merge when they collide, conserving mass and momentum.",
+              concept: "Key concepts",
+              concept1: "Universal gravitation law: force is proportional to the product of masses and inversely proportional to the square of distance",
+              concept2: "Emergent behavior: complex structures (clusters) emerge from simple rules",
+              concept3: "Momentum conservation: in collisions, total mass and momentum are conserved",
+              tryThis: "Try this",
+              try1: "Increase G to 300-400: particles quickly form compact clusters",
+              try2: "Decrease G to 20-30: observe slower movements and gradual aggregation",
+              try3: "Start with few particles (20-30) to better follow individual interactions",
+              controls: "Controls",
+              numParticles: "Number of particles",
+              initialVel: "Initial velocity",
+              gravConstant: "Constant G",
+              start: "Start",
+              pause: "Pause",
+              reset: "Reset",
+              activeParticles: "Active particles",
+              legend: "Color legend",
+              legendDesc: "Color indicates mass: red (small) → orange → yellow → green → blue → violet (large)",
+              credits: "Created by",
+              scientificNote: "Note: this is a simplified model for educational purposes. Real gravitational systems follow the same laws but at much larger scales and complexity."
+            }
+          };
+          
+          const t = texts[language];
+          
+          // Converte massa in colore (rosso → violetto seguendo spettro)
+          const massToColor = (mass) => {
+            const minMass = 1;
+            const maxMass = 50;
+            const normalized = Math.min(Math.max((mass - minMass) / (maxMass - minMass), 0), 1);
+            
+            // Spettro: rosso (0°) → violetto (270°)
+            const hue = 0 + normalized * 270;
+            return `hsl(${hue}, 80%, 50%)`;
+          };
+          
+          // Inizializza particelle
+          const initializeParticles = () => {
+            const newParticles = [];
+            for (let i = 0; i < numParticles; i++) {
+              const mass = 1 + Math.random() * 3;
+              const angle = Math.random() * Math.PI * 2;
+              newParticles.push({
+                id: i,
+                x: Math.random() * canvasWidth,
+                y: Math.random() * canvasHeight,
+                vx: Math.cos(angle) * initialVelocity,
+                vy: Math.sin(angle) * initialVelocity,
+                mass: mass,
+                radius: Math.sqrt(mass) * 3,
+                alive: true
+              });
+            }
+            setParticles(newParticles);
+          };
+          
+          // Reset simulazione
+          const handleReset = () => {
+            setIsRunning(false);
+            if (animationRef.current) {
+              cancelAnimationFrame(animationRef.current);
+            }
+            initializeParticles();
+          };
+          
+          // Toggle play/pause
+          const toggleSimulation = () => {
+            setIsRunning(!isRunning);
+          };
+          
+          // Fisica: calcola forze e aggiorna posizioni
+          const updatePhysics = (parts) => {
+            const dt = 0.016; // ~60 FPS
+            const newParticles = parts.filter(p => p.alive).map(p => ({...p}));
+            
+            // Calcola forze gravitazionali
+            for (let i = 0; i < newParticles.length; i++) {
+              if (!newParticles[i].alive) continue;
+              
+              let fx = 0, fy = 0;
+              
+              for (let j = 0; j < newParticles.length; j++) {
+                if (i === j || !newParticles[j].alive) continue;
+                
+                const dx = newParticles[j].x - newParticles[i].x;
+                const dy = newParticles[j].y - newParticles[i].y;
+                const distSq = dx * dx + dy * dy;
+                const dist = Math.sqrt(distSq);
+                
+                // Controlla collisione
+                if (dist < newParticles[i].radius + newParticles[j].radius) {
+                  // Fusione: la particella più grande assorbe la più piccola
+                  if (newParticles[i].mass >= newParticles[j].mass) {
+                    const totalMass = newParticles[i].mass + newParticles[j].mass;
+                    // Conservazione quantità di moto
+                    newParticles[i].vx = (newParticles[i].vx * newParticles[i].mass + newParticles[j].vx * newParticles[j].mass) / totalMass;
+                    newParticles[i].vy = (newParticles[i].vy * newParticles[i].mass + newParticles[j].vy * newParticles[j].mass) / totalMass;
+                    newParticles[i].mass = totalMass;
+                    newParticles[i].radius = Math.sqrt(newParticles[i].mass) * 3;
+                    newParticles[j].alive = false;
+                  } else {
+                    const totalMass = newParticles[i].mass + newParticles[j].mass;
+                    newParticles[j].vx = (newParticles[i].vx * newParticles[i].mass + newParticles[j].vx * newParticles[j].mass) / totalMass;
+                    newParticles[j].vy = (newParticles[i].vy * newParticles[i].mass + newParticles[j].vy * newParticles[j].mass) / totalMass;
+                    newParticles[j].mass = totalMass;
+                    newParticles[j].radius = Math.sqrt(newParticles[j].mass) * 3;
+                    newParticles[i].alive = false;
+                  }
+                  continue;
+                }
+                
+                // Forza gravitazionale: F = G * m1 * m2 / r^2
+                const force = gravitationalConstant * newParticles[i].mass * newParticles[j].mass / Math.max(distSq, 100);
+                fx += force * dx / dist;
+                fy += force * dy / dist;
+              }
+              
+              // Aggiorna velocità e posizione
+              if (newParticles[i].alive) {
+                newParticles[i].vx += (fx / newParticles[i].mass) * dt;
+                newParticles[i].vy += (fy / newParticles[i].mass) * dt;
+                newParticles[i].x += newParticles[i].vx * dt;
+                newParticles[i].y += newParticles[i].vy * dt;
+                
+                // Rimbalzo sui bordi
+                if (newParticles[i].x < newParticles[i].radius) {
+                  newParticles[i].x = newParticles[i].radius;
+                  newParticles[i].vx *= -0.8;
+                }
+                if (newParticles[i].x > canvasWidth - newParticles[i].radius) {
+                  newParticles[i].x = canvasWidth - newParticles[i].radius;
+                  newParticles[i].vx *= -0.8;
+                }
+                if (newParticles[i].y < newParticles[i].radius) {
+                  newParticles[i].y = newParticles[i].radius;
+                  newParticles[i].vy *= -0.8;
+                }
+                if (newParticles[i].y > canvasHeight - newParticles[i].radius) {
+                  newParticles[i].y = canvasHeight - newParticles[i].radius;
+                  newParticles[i].vy *= -0.8;
+                }
+              }
+            }
+            
+            return newParticles.filter(p => p.alive);
+          };
+          
+          // Rendering
+          useEffect(() => {
+            const canvas = canvasRef.current;
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            
+            const render = () => {
+              ctx.fillStyle = '#0a0a0a';
+              ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+              
+              particles.forEach(p => {
+                if (!p.alive) return;
+                ctx.fillStyle = massToColor(p.mass);
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+              });
+            };
+            
+            render();
+          }, [particles]);
+          
+          // Animation loop
+          useEffect(() => {
+            if (!isRunning) return;
+            
+            const animate = () => {
+              setParticles(prevParticles => updatePhysics(prevParticles));
+              animationRef.current = requestAnimationFrame(animate);
+            };
+            
+            animationRef.current = requestAnimationFrame(animate);
+            
+            return () => {
+              if (animationRef.current) {
+                cancelAnimationFrame(animationRef.current);
+              }
+            };
+          }, [isRunning, gravitationalConstant]);
+          
+          // Inizializza al mount e quando cambiano i parametri
+          useEffect(() => {
+            if (!isRunning) {
+              initializeParticles();
+            }
+          }, [numParticles, initialVelocity]);
+          
+          return (
+            <div className="flex flex-col items-center gap-6 p-6 bg-gray-900 min-h-screen">
+              {/* Language toggle */}
+              <div className="self-end">
+                <div className="flex gap-2 bg-gray-800 rounded-lg p-1">
+                  <button 
+                    onClick={() => setLanguage('it')}
+                    className={`px-4 py-2 rounded-md font-semibold transition ${
+                      language === 'it' 
+                        ? 'bg-blue-600 text-white' 
+                        : 'text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    IT
+                  </button>
+                  <button 
+                    onClick={() => setLanguage('en')}
+                    className={`px-4 py-2 rounded-md font-semibold transition ${
+                      language === 'en' 
+                        ? 'bg-blue-600 text-white' 
+                        : 'text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    EN
+                  </button>
+                </div>
+              </div>
+              
+              {/* Header */}
+              <div className="text-center max-w-4xl">
+                <h1 className="text-4xl font-bold text-white mb-2">{t.title}</h1>
+                <p className="text-xl text-gray-400">{t.subtitle}</p>
+              </div>
+              
+              {/* Description */}
+              <div className="bg-gray-800 p-6 rounded-lg max-w-4xl w-full">
+                <p className="text-gray-300 leading-relaxed">{t.description}</p>
+              </div>
+              
+              {/* Canvas */}
+              <canvas
+                ref={canvasRef}
+                width={canvasWidth}
+                height={canvasHeight}
+                className="border-2 border-gray-700 rounded-lg shadow-2xl"
+              />
+              
+              {/* Controls */}
+              <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-4xl">
+                <h3 className="text-xl font-bold text-white mb-4">{t.controls}</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                  <div>
+                    <label className="block text-white mb-2 text-sm">
+                      {t.numParticles}: <span className="font-bold">{numParticles}</span>
+                    </label>
+                    <input
+                      type="range"
+                      min="10"
+                      max="200"
+                      value={numParticles}
+                      onChange={(e) => setNumParticles(parseInt(e.target.value))}
+                      disabled={isRunning}
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-white mb-2 text-sm">
+                      {t.initialVel}: <span className="font-bold">{initialVelocity.toFixed(2)}</span>
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="3"
+                      step="0.1"
+                      value={initialVelocity}
+                      onChange={(e) => setInitialVelocity(parseFloat(e.target.value))}
+                      disabled={isRunning}
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-white mb-2 text-sm">
+                      {t.gravConstant}: <span className="font-bold">{gravitationalConstant}</span>
+                    </label>
+                    <input
+                      type="range"
+                      min="10"
+                      max="500"
+                      step="10"
+                      value={gravitationalConstant}
+                      onChange={(e) => setGravitationalConstant(parseInt(e.target.value))}
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex gap-4 justify-center mb-4">
+                  <button
+                    onClick={toggleSimulation}
+                    className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition"
+                  >
+                    {isRunning ? t.pause : t.start}
+                  </button>
+                  
+                  <button
+                    onClick={handleReset}
+                    className="px-8 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition"
+                  >
+                    {t.reset}
+                  </button>
+                </div>
+                
+                <div className="text-gray-300 text-sm">
+                  <p><span className="font-bold">{t.activeParticles}:</span> {particles.filter(p => p.alive).length}</p>
+                </div>
+              </div>
+              
+              {/* Color legend */}
+              <div className="bg-gray-800 p-6 rounded-lg max-w-4xl w-full">
+                <h3 className="text-xl font-bold text-white mb-3">{t.legend}</h3>
+                <p className="text-gray-300 mb-3">{t.legendDesc}</p>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 h-8 rounded" style={{
+                    background: 'linear-gradient(to right, hsl(0, 80%, 50%), hsl(30, 80%, 50%), hsl(60, 80%, 50%), hsl(120, 80%, 50%), hsl(210, 80%, 50%), hsl(270, 80%, 50%))'
+                  }}></div>
+                </div>
+              </div>
+              
+              {/* Key concepts */}
+              <div className="bg-gray-800 p-6 rounded-lg max-w-4xl w-full">
+                <h3 className="text-xl font-bold text-white mb-4">{t.concept}</h3>
+                <ul className="space-y-3 text-gray-300">
+                  <li className="flex gap-3">
+                    <span className="text-blue-400 font-bold">•</span>
+                    <span>{t.concept1}</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-blue-400 font-bold">•</span>
+                    <span>{t.concept2}</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-blue-400 font-bold">•</span>
+                    <span>{t.concept3}</span>
+                  </li>
+                </ul>
+              </div>
+              
+              {/* Try this */}
+              <div className="bg-gray-800 p-6 rounded-lg max-w-4xl w-full">
+                <h3 className="text-xl font-bold text-white mb-4">{t.tryThis}</h3>
+                <ul className="space-y-2 text-gray-300">
+                  <li className="flex gap-3">
+                    <span className="text-green-400 font-bold">→</span>
+                    <span>{t.try1}</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-green-400 font-bold">→</span>
+                    <span>{t.try2}</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-green-400 font-bold">→</span>
+                    <span>{t.try3}</span>
+                  </li>
+                </ul>
+              </div>
+              
+              {/* Scientific note */}
+              <div className="bg-gray-800 p-4 rounded-lg max-w-4xl w-full">
+                <p className="text-gray-400 text-sm italic">{t.scientificNote}</p>
+              </div>
+              
+              {/* Credits */}
+              <div className="text-gray-400 text-sm mt-4">
+                <p>
+                  {t.credits}{' '}
+                  <a 
+                    href="https://ai-know.pro" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-400 hover:text-blue-300 transition"
+                  >
+                    Paolo Dalprato
+                  </a>
+                </p>
+              </div>
+            </div>
+          );
+        };
+
+        ReactDOM.render(<GravitySimulator />, document.getElementById('root'));
+    </script>
+</body>
+</html>

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How the Heart Works - Interactive Simulator</title>
+  <meta name="description" content="Interactive simulator of the human heart. Discover how the cardiac cycle works in 7 phases.">
+  <meta name="author" content="Paolo Dalprato">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const HeartSimulator = () => {
+      const [lang, setLang] = useState('en');
+      const [showIntro, setShowIntro] = useState(true);
+      const [currentStep, setCurrentStep] = useState(0);
+      const [selectedPart, setSelectedPart] = useState(null);
+      const [showModal, setShowModal] = useState(false);
+      const [particleProgress, setParticleProgress] = useState(0);
+      const [heartbeat, setHeartbeat] = useState(0);
+
+      const t = {
+        it: {
+          title: 'Come Funziona il Cuore',
+          introTitle: '❤️ Benvenuto nel Simulatore del Cuore',
+          introText: `Stai per esplorare il funzionamento del cuore umano attraverso un viaggio interattivo in 7 fasi.
+
+Vedrai come il sangue viaggia dal corpo ai polmoni per ossigenarsi e poi ritorna al corpo, seguendo il percorso attraverso le quattro camere cardiache e le valvole.
+
+• I pallini BLU rappresentano il sangue venoso (povero di ossigeno)
+• I pallini ROSSI rappresentano il sangue ossigenato
+• Clicca su qualsiasi parte del cuore per scoprire la sua funzione`,
+          startButton: 'Inizia il viaggio →',
+          step: 'Fase',
+          of: 'di',
+          nextStep: 'Avanti →',
+          prevStep: '← Indietro',
+          close: 'Chiudi',
+          tip: 'Clicca sulle parti del cuore per scoprire la loro funzione.',
+          lungs: 'POLMONI - Ossigenazione del sangue',
+          body: 'CORPO - Organi e tessuti',
+          venousBlood: 'Sangue venoso',
+          oxygenatedBlood: 'Sangue arterioso',
+          credits: 'Creato da',
+          chambers: { ra: 'AD', la: 'AS', rv: 'VD', lv: 'VS' },
+          steps: [
+            { title: '1. Ritorno venoso al cuore destro', desc: "Il sangue povero di ossigeno (blu) ritorna dal corpo attraverso le vene cave. L'atrio destro (AD) si riempie e si dilata per accogliere il sangue." },
+            { title: '2. Dall\'atrio al ventricolo destro', desc: "L'atrio destro si contrae. La valvola tricuspide si apre e il sangue viene spinto nel ventricolo destro (VD), che si dilata." },
+            { title: '3. Verso i polmoni', desc: "Il ventricolo destro si contrae (sistole). La valvola tricuspide si chiude, la valvola polmonare si apre. Il sangue viene pompato verso i polmoni attraverso l'arteria polmonare." },
+            { title: '4. Ossigenazione nei polmoni', desc: "Nei polmoni il sangue rilascia anidride carbonica (CO₂) e assorbe ossigeno (O₂). Il colore cambia da blu a rosso vivo. Il sangue ossigenato ritorna al cuore." },
+            { title: '5. Ritorno all\'atrio sinistro', desc: "Il sangue ossigenato (rosso) arriva all'atrio sinistro (AS) attraverso le vene polmonari. L'atrio si dilata per accoglierlo." },
+            { title: '6. Dall\'atrio al ventricolo sinistro', desc: "L'atrio sinistro si contrae. La valvola mitrale si apre e il sangue passa nel ventricolo sinistro (VS), la camera più muscolare del cuore." },
+            { title: '7. Distribuzione al corpo', desc: "Il ventricolo sinistro si contrae con forza (sistole). La valvola mitrale si chiude, la valvola aortica si apre. Il sangue viene pompato nell'aorta e raggiunge tutti gli organi del corpo, cedendo ossigeno e raccogliendo CO₂. Il ciclo ricomincia!" }
+          ],
+          parts: {
+            rightAtrium: { name: 'Atrio Destro (AD)', description: "Camera superiore destra del cuore. Riceve il sangue venoso (povero di ossigeno) da tutto il corpo attraverso le vene cave. È come una \"sala d'attesa\" prima che il sangue passi al ventricolo." },
+            leftAtrium: { name: 'Atrio Sinistro (AS)', description: "Camera superiore sinistra. Riceve il sangue appena ossigenato dai polmoni. Ha pareti più spesse dell'atrio destro perché deve spingere il sangue nel potente ventricolo sinistro." },
+            rightVentricle: { name: 'Ventricolo Destro (VD)', description: "Camera inferiore destra. Pompa il sangue verso i polmoni. Ha pareti più sottili del ventricolo sinistro perché i polmoni sono vicini e oppongono poca resistenza." },
+            leftVentricle: { name: 'Ventricolo Sinistro (VS)', description: "La camera più muscolare e potente del cuore. Deve pompare il sangue in tutto il corpo, dalla testa ai piedi! Le sue pareti sono 3 volte più spesse del ventricolo destro." },
+            tricuspid: { name: 'Valvola Tricuspide', description: "Ha tre lembi (\"tri\" = tre). Si trova tra atrio e ventricolo destro. Si apre per far passare il sangue, si chiude per impedire che torni indietro quando il ventricolo si contrae." },
+            mitral: { name: 'Valvola Mitrale', description: "Ha due lembi, come una mitra vescovile (da cui il nome). È la valvola più sollecitata perché deve resistere alla forte pressione del ventricolo sinistro." },
+            pulmonary: { name: 'Valvola Polmonare', description: "All'uscita del ventricolo destro, verso i polmoni. Si apre durante la contrazione ventricolare e si chiude per impedire che il sangue torni indietro." },
+            aortic: { name: 'Valvola Aortica', description: "La valvola più importante! Controlla l'uscita del sangue dal cuore verso tutto il corpo. Quando si chiude produce il \"secondo tono\" cardiaco (il \"dup\" del \"lub-dup\")." },
+            lungs: { name: 'Polmoni', description: "Qui avviene la magia dello scambio gassoso! Il sangue rilascia l'anidride carbonica (prodotto di scarto) e assorbe ossigeno fresco. Contengono circa 300 milioni di piccole sacche chiamate alveoli." },
+            body: { name: 'Corpo (Circolo Sistemico)', description: "Tutti gli organi e tessuti del corpo ricevono sangue ossigenato e restituiscono sangue venoso. Il sangue impiega circa 20 secondi per compiere un giro completo!" },
+            aorta: { name: 'Aorta', description: "La più grande arteria del corpo, spessa come un tubo da giardino! Parte dal cuore, forma un arco e scende lungo il corpo. Da essa partono tutte le arterie che nutrono gli organi." },
+            pulmonaryArtery: { name: 'Arteria Polmonare', description: "L'unica arteria che trasporta sangue \"blu\" (venoso). Si divide in due rami, uno per ogni polmone. Nonostante il nome \"arteria\", porta sangue da ossigenare." },
+            venaCava: { name: 'Vena Cava', description: "Le vene più grandi del corpo. Raccolgono il sangue venoso da tutto il corpo e lo riportano all'atrio destro del cuore." },
+            pulmonaryVeins: { name: 'Vene Polmonari', description: "Le uniche vene che trasportano sangue rosso (ossigenato)! Sono quattro: due dal polmone destro e due dal sinistro. Portano il sangue \"fresco\" all'atrio sinistro." }
+          }
+        },
+        en: {
+          title: 'How the Heart Works',
+          introTitle: '❤️ Welcome to the Heart Simulator',
+          introText: `You are about to explore how the human heart works through an interactive journey in 7 steps.
+
+You will see how blood travels from the body to the lungs to get oxygen and then returns to the body, following the path through the four heart chambers and valves.
+
+• BLUE dots represent venous blood (low in oxygen)
+• RED dots represent oxygenated blood
+• Click on any part of the heart to learn its function`,
+          startButton: 'Start the journey →',
+          step: 'Step',
+          of: 'of',
+          nextStep: 'Next →',
+          prevStep: '← Back',
+          close: 'Close',
+          tip: 'Click on heart parts to learn their function.',
+          lungs: 'LUNGS - Blood oxygenation',
+          body: 'BODY - Organs and tissues',
+          venousBlood: 'Venous blood',
+          oxygenatedBlood: 'Arterial blood',
+          credits: 'Created by',
+          chambers: { ra: 'RA', la: 'LA', rv: 'RV', lv: 'LV' },
+          steps: [
+            { title: '1. Venous return to right heart', desc: 'Oxygen-poor blood (blue) returns from the body through the vena cava. The right atrium (RA) fills and expands to receive the blood.' },
+            { title: '2. From atrium to right ventricle', desc: 'The right atrium contracts. The tricuspid valve opens and blood is pushed into the right ventricle (RV), which expands.' },
+            { title: '3. Toward the lungs', desc: 'The right ventricle contracts (systole). The tricuspid valve closes, the pulmonary valve opens. Blood is pumped to the lungs through the pulmonary artery.' },
+            { title: '4. Oxygenation in the lungs', desc: 'In the lungs, blood releases carbon dioxide (CO₂) and absorbs oxygen (O₂). The color changes from blue to bright red. Oxygenated blood returns to the heart.' },
+            { title: '5. Return to left atrium', desc: 'Oxygenated blood (red) arrives at the left atrium (LA) through the pulmonary veins. The atrium expands to receive it.' },
+            { title: '6. From atrium to left ventricle', desc: 'The left atrium contracts. The mitral valve opens and blood passes into the left ventricle (LV), the most muscular chamber of the heart.' },
+            { title: '7. Distribution to the body', desc: 'The left ventricle contracts forcefully (systole). The mitral valve closes, the aortic valve opens. Blood is pumped into the aorta and reaches all organs, delivering oxygen and collecting CO₂. The cycle begins again!' }
+          ],
+          parts: {
+            rightAtrium: { name: 'Right Atrium (RA)', description: 'Upper right chamber of the heart. Receives venous blood (low in oxygen) from the entire body through the vena cava. It\'s like a "waiting room" before blood passes to the ventricle.' },
+            leftAtrium: { name: 'Left Atrium (LA)', description: 'Upper left chamber. Receives freshly oxygenated blood from the lungs. Has thicker walls than the right atrium because it must push blood into the powerful left ventricle.' },
+            rightVentricle: { name: 'Right Ventricle (RV)', description: 'Lower right chamber. Pumps blood to the lungs. Has thinner walls than the left ventricle because the lungs are nearby and offer little resistance.' },
+            leftVentricle: { name: 'Left Ventricle (LV)', description: 'The most muscular and powerful chamber of the heart. Must pump blood throughout the body, from head to toes! Its walls are 3 times thicker than the right ventricle.' },
+            tricuspid: { name: 'Tricuspid Valve', description: 'Has three leaflets ("tri" = three). Located between the right atrium and ventricle. Opens to let blood pass, closes to prevent backflow when the ventricle contracts.' },
+            mitral: { name: 'Mitral Valve', description: 'Has two leaflets, like a bishop\'s mitre (hence the name). It\'s the most stressed valve because it must withstand the strong pressure of the left ventricle.' },
+            pulmonary: { name: 'Pulmonary Valve', description: 'At the exit of the right ventricle, toward the lungs. Opens during ventricular contraction and closes to prevent blood from flowing back.' },
+            aortic: { name: 'Aortic Valve', description: 'The most important valve! Controls the exit of blood from the heart to the entire body. When it closes, it produces the "second heart sound" (the "dup" in "lub-dup").' },
+            lungs: { name: 'Lungs', description: 'This is where the magic of gas exchange happens! Blood releases carbon dioxide (waste product) and absorbs fresh oxygen. They contain about 300 million tiny sacs called alveoli.' },
+            body: { name: 'Body (Systemic Circuit)', description: 'All organs and tissues receive oxygenated blood and return venous blood. Blood takes about 20 seconds to complete one full circuit!' },
+            aorta: { name: 'Aorta', description: 'The largest artery in the body, as thick as a garden hose! It leaves the heart, forms an arch and descends through the body. All arteries that feed organs branch from it.' },
+            pulmonaryArtery: { name: 'Pulmonary Artery', description: 'The only artery carrying "blue" (venous) blood. It divides into two branches, one for each lung. Despite being called an "artery", it carries blood to be oxygenated.' },
+            venaCava: { name: 'Vena Cava', description: 'The largest veins in the body. They collect venous blood from the entire body and return it to the right atrium of the heart.' },
+            pulmonaryVeins: { name: 'Pulmonary Veins', description: 'The only veins carrying red (oxygenated) blood! There are four: two from the right lung and two from the left. They bring "fresh" blood to the left atrium.' }
+          }
+        }
+      };
+
+      const texts = t[lang];
+      const totalSteps = 7;
+
+      useEffect(() => {
+        const interval = setInterval(() => setParticleProgress(p => (p + 2) % 100), 50);
+        return () => clearInterval(interval);
+      }, [currentStep]);
+
+      useEffect(() => {
+        const interval = setInterval(() => setHeartbeat(h => (h + 1) % 100), 30);
+        return () => clearInterval(interval);
+      }, []);
+
+      const getStepStates = () => {
+        const s = currentStep;
+        return {
+          raExpand: s === 0, raContract: s === 1,
+          rvExpand: s === 1, rvContract: s === 2,
+          laExpand: s === 4, laContract: s === 5,
+          lvExpand: s === 5, lvContract: s === 6,
+          tricuspidOpen: s === 1, mitralOpen: s === 5,
+          pulmonaryOpen: s === 2, aorticOpen: s === 6
+        };
+      };
+
+      const states = getStepStates();
+
+      const getParticlePath = (step) => {
+        const paths = {
+          0: [{ x: 50, y: 400 }, { x: 50, y: 300 }, { x: 50, y: 220 }, { x: 65, y: 185 }, { x: 100, y: 180 }],
+          1: [{ x: 130, y: 180 }, { x: 130, y: 200 }, { x: 135, y: 230 }, { x: 140, y: 270 }, { x: 140, y: 300 }],
+          2: [{ x: 140, y: 300 }, { x: 115, y: 260 }, { x: 85, y: 210 }, { x: 60, y: 160 }, { x: 50, y: 105 }],
+          3: [{ x: 50, y: 105 }, { x: 100, y: 75 }, { x: 170, y: 65 }, { x: 240, y: 75 }, { x: 290, y: 105 }],
+          4: [{ x: 290, y: 105 }, { x: 270, y: 130 }, { x: 245, y: 150 }, { x: 220, y: 155 }, { x: 210, y: 150 }],
+          5: [{ x: 210, y: 150 }, { x: 210, y: 175 }, { x: 210, y: 205 }, { x: 210, y: 250 }, { x: 210, y: 290 }],
+          6: [{ x: 210, y: 290 }, { x: 240, y: 250 }, { x: 265, y: 210 }, { x: 290, y: 300 }, { x: 290, y: 400 }]
+        };
+        return paths[step] || paths[0];
+      };
+
+      const interpolatePath = (path, progress) => {
+        const totalSegments = path.length - 1;
+        const segmentProgress = (progress / 100) * totalSegments;
+        const segmentIndex = Math.min(Math.floor(segmentProgress), totalSegments - 1);
+        const localProgress = segmentProgress - segmentIndex;
+        const p1 = path[segmentIndex];
+        const p2 = path[segmentIndex + 1];
+        return { x: p1.x + (p2.x - p1.x) * localProgress, y: p1.y + (p2.y - p1.y) * localProgress, progress };
+      };
+
+      const getParticleColor = (step, progress) => {
+        if (step < 3) return '#3b82f6';
+        if (step === 3) return progress >= 50 ? '#ef4444' : '#3b82f6';
+        return '#ef4444';
+      };
+
+      const handlePartClick = (part) => { setSelectedPart(part); setShowModal(true); };
+      const nextStep = () => { setCurrentStep(s => (s + 1) % totalSteps); setParticleProgress(0); };
+      const prevStep = () => { setCurrentStep(s => (s - 1 + totalSteps) % totalSteps); setParticleProgress(0); };
+
+      const getChamberScale = (expand, contract) => {
+        const pulse = Math.sin(heartbeat * 0.15) * 0.02;
+        if (expand) return 1.1 + pulse;
+        if (contract) return 0.87 + pulse;
+        return 1 + pulse * 0.5;
+      };
+
+      const renderValve = (cx, cy, isOpen, rotation, partId) => (
+        <g onClick={() => handlePartClick(partId)} className="cursor-pointer hover:brightness-125" transform={`rotate(${rotation} ${cx} ${cy})`}>
+          <ellipse cx={cx} cy={cy} rx={isOpen ? 16 : 14} ry={isOpen ? 8 : 5}
+                   fill={isOpen ? 'transparent' : '#fbbf24'} 
+                   stroke="#d97706" strokeWidth={isOpen ? 3 : 2}
+                   style={{ transition: 'all 0.3s ease-out' }}/>
+        </g>
+      );
+
+      const path = getParticlePath(currentStep);
+      const particles = [0, 18, 36, 54, 72].map(offset => {
+        const prog = (particleProgress + offset) % 100;
+        const pos = interpolatePath(path, prog);
+        return { ...pos, particleProgress: prog };
+      });
+
+      if (showIntro) {
+        return (
+          <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white flex items-center justify-center p-4">
+            <div className="bg-slate-800 rounded-2xl p-6 max-w-lg w-full shadow-2xl border border-slate-600">
+              <div className="flex justify-end mb-2">
+                <div className="flex bg-slate-700 rounded-lg overflow-hidden">
+                  <button onClick={() => setLang('it')} className={`px-3 py-1 text-sm ${lang === 'it' ? 'bg-red-600' : 'hover:bg-slate-600'}`}>🇮🇹</button>
+                  <button onClick={() => setLang('en')} className={`px-3 py-1 text-sm ${lang === 'en' ? 'bg-blue-600' : 'hover:bg-slate-600'}`}>🇬🇧</button>
+                </div>
+              </div>
+              <h1 className="text-2xl font-bold text-red-400 mb-4 text-center">{texts.introTitle}</h1>
+              <div className="text-slate-300 whitespace-pre-line leading-relaxed mb-6">{texts.introText}</div>
+              <button onClick={() => setShowIntro(false)} className="w-full py-3 bg-red-600 hover:bg-red-700 rounded-xl font-bold text-lg transition-colors">
+                {texts.startButton}
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white p-3">
+          <div className="flex justify-between items-center mb-3 max-w-5xl mx-auto">
+            <h1 className="text-xl font-bold text-red-400">❤️ {texts.title}</h1>
+            <div className="flex bg-slate-700 rounded-lg overflow-hidden">
+              <button onClick={() => setLang('it')} className={`px-3 py-1 text-sm font-medium ${lang === 'it' ? 'bg-red-600' : 'hover:bg-slate-600'}`}>🇮🇹</button>
+              <button onClick={() => setLang('en')} className={`px-3 py-1 text-sm font-medium ${lang === 'en' ? 'bg-blue-600' : 'hover:bg-slate-600'}`}>🇬🇧</button>
+            </div>
+          </div>
+
+          <div className="flex flex-col lg:flex-row gap-3 max-w-5xl mx-auto">
+            <div className="flex-1 bg-slate-800/50 rounded-xl p-3">
+              <svg viewBox="0 0 340 490" className="w-full max-w-lg mx-auto">
+                  <g onClick={() => handlePartClick('lungs')} className="cursor-pointer hover:brightness-110">
+                    <rect x="30" y="40" width="280" height="65" rx="12" fill="#fecaca" stroke="#f87171" strokeWidth="2"/>
+                    <text x="170" y="78" textAnchor="middle" fill="#b91c1c" fontSize="11" fontWeight="bold">{texts.lungs}</text>
+                  </g>
+
+                  <g onClick={() => handlePartClick('body')} className="cursor-pointer hover:brightness-110">
+                    <rect x="30" y="400" width="280" height="65" rx="12" fill="#64748b" stroke="#475569" strokeWidth="2"/>
+                    <text x="170" y="438" textAnchor="middle" fill="#e2e8f0" fontSize="11" fontWeight="bold">{texts.body}</text>
+                  </g>
+
+                  <g onClick={() => handlePartClick('venaCava')} className="cursor-pointer hover:brightness-125">
+                    <path d="M50 400 L50 200 Q50 170 80 170 L88 175" fill="none" stroke="#1e40af" strokeWidth="18" strokeLinecap="round"/>
+                    <path d="M50 400 L50 200 Q50 170 80 170 L88 175" fill="none" stroke="#93c5fd" strokeWidth="10" strokeLinecap="round"/>
+                  </g>
+
+                  <g onClick={() => handlePartClick('pulmonaryArtery')} className="cursor-pointer hover:brightness-125">
+                    <path d="M110 240 Q 75 200, 55 155 Q 45 125, 50 105" fill="none" stroke="#1e40af" strokeWidth="16" strokeLinecap="round"/>
+                    <path d="M110 240 Q 75 200, 55 155 Q 45 125, 50 105" fill="none" stroke="#93c5fd" strokeWidth="8" strokeLinecap="round"/>
+                  </g>
+
+                  <g onClick={() => handlePartClick('pulmonaryVeins')} className="cursor-pointer hover:brightness-125">
+                    <path d="M280 105 Q 265 125, 245 145 Q 230 155, 220 155" fill="none" stroke="#991b1b" strokeWidth="14" strokeLinecap="round"/>
+                    <path d="M280 105 Q 265 125, 245 145 Q 230 155, 220 155" fill="none" stroke="#fca5a5" strokeWidth="6" strokeLinecap="round"/>
+                  </g>
+
+                  <g onClick={() => handlePartClick('aorta')} className="cursor-pointer hover:brightness-125">
+                    <path d="M252 202 Q280 180 290 200 L290 400" fill="none" stroke="#991b1b" strokeWidth="16" strokeLinecap="round"/>
+                    <path d="M252 202 Q280 180 290 200 L290 400" fill="none" stroke="#fca5a5" strokeWidth="8" strokeLinecap="round"/>
+                  </g>
+
+                  <g onClick={() => handlePartClick('rightAtrium')} className="cursor-pointer"
+                     style={{ transform: `scale(${getChamberScale(states.raExpand, states.raContract)})`, transformOrigin: '130px 180px', transition: 'transform 0.25s ease-out' }}>
+                    <ellipse cx="130" cy="180" rx="42" ry="36" fill="#60a5fa" stroke="#3b82f6" strokeWidth="3"/>
+                    <text x="130" y="185" textAnchor="middle" fill="white" fontSize="15" fontWeight="bold">{texts.chambers.ra}</text>
+                  </g>
+
+                  <g onClick={() => handlePartClick('leftAtrium')} className="cursor-pointer"
+                     style={{ transform: `scale(${getChamberScale(states.laExpand, states.laContract)})`, transformOrigin: '210px 160px', transition: 'transform 0.25s ease-out' }}>
+                    <ellipse cx="210" cy="160" rx="40" ry="34" fill="#f87171" stroke="#ef4444" strokeWidth="3"/>
+                    <text x="210" y="165" textAnchor="middle" fill="white" fontSize="15" fontWeight="bold">{texts.chambers.la}</text>
+                  </g>
+
+                  <g onClick={() => handlePartClick('rightVentricle')} className="cursor-pointer"
+                     style={{ transform: `scale(${getChamberScale(states.rvExpand, states.rvContract)})`, transformOrigin: '135px 300px', transition: 'transform 0.25s ease-out' }}>
+                    <path d="M90 230 Q 70 280, 90 340 Q 115 380, 170 365 L170 230 Q 150 240, 130 235 Q 110 230, 90 230" fill="#60a5fa" stroke="#3b82f6" strokeWidth="3"/>
+                    <text x="125" y="305" textAnchor="middle" fill="white" fontSize="15" fontWeight="bold">{texts.chambers.rv}</text>
+                  </g>
+
+                  <g onClick={() => handlePartClick('leftVentricle')} className="cursor-pointer"
+                     style={{ transform: `scale(${getChamberScale(states.lvExpand, states.lvContract)})`, transformOrigin: '215px 300px', transition: 'transform 0.25s ease-out' }}>
+                    <path d="M180 230 L180 365 Q 210 390, 250 350 Q 280 300, 270 235 Q 250 205, 225 200 Q 200 210, 180 230" fill="#f87171" stroke="#ef4444" strokeWidth="3"/>
+                    <text x="215" y="305" textAnchor="middle" fill="white" fontSize="15" fontWeight="bold">{texts.chambers.lv}</text>
+                  </g>
+
+                  {renderValve(135, 225, states.tricuspidOpen, 0, 'tricuspid')}
+                  {renderValve(210, 200, states.mitralOpen, 0, 'mitral')}
+                  {renderValve(95, 235, states.pulmonaryOpen, -50, 'pulmonary')}
+                  {renderValve(252, 202, states.aorticOpen, 50, 'aortic')}
+
+                  <g transform="translate(50, 480)">
+                    <circle cx="0" cy="0" r="6" fill="#3b82f6"/>
+                    <text x="12" y="4" fill="#94a3b8" fontSize="9">{texts.venousBlood}</text>
+                    <circle cx="180" cy="0" r="6" fill="#ef4444"/>
+                    <text x="192" y="4" fill="#94a3b8" fontSize="9">{texts.oxygenatedBlood}</text>
+                  </g>
+
+                  {/* Particles on top layer */}
+                  {particles.map((p, i) => (
+                    <g key={i}>
+                      <circle cx={p.x} cy={p.y} r={8 - i * 0.8} fill={getParticleColor(currentStep, p.particleProgress)} opacity={1 - i * 0.12}>
+                        <animate attributeName="r" values={`${8-i*0.8};${9.5-i*0.8};${8-i*0.8}`} dur="0.5s" repeatCount="indefinite"/>
+                      </circle>
+                      <circle cx={p.x} cy={p.y} r={12 - i} fill={getParticleColor(currentStep, p.particleProgress)} opacity={0.25 - i * 0.04}/>
+                    </g>
+                  ))}
+                </svg>
+              </div>
+
+              <div className="w-full lg:w-80 space-y-3">
+                <div className="bg-slate-800 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm text-slate-400">{texts.step} {currentStep + 1} {texts.of} {totalSteps}</span>
+                    <div className="flex gap-1">
+                      {[...Array(totalSteps)].map((_, i) => (
+                        <div key={i} className={`w-2 h-2 rounded-full transition-all ${i === currentStep ? 'bg-red-500 w-4' : i < currentStep ? 'bg-red-400/50' : 'bg-slate-600'}`}/>
+                      ))}
+                    </div>
+                  </div>
+                  <h3 className="font-bold text-lg text-amber-400 mb-2">{texts.steps[currentStep].title}</h3>
+                  <p className="text-slate-300 text-sm leading-relaxed mb-4">{texts.steps[currentStep].desc}</p>
+                  <div className="flex gap-2">
+                    <button onClick={prevStep} className="flex-1 py-2.5 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm font-medium transition-colors">{texts.prevStep}</button>
+                    <button onClick={nextStep} className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 rounded-lg text-sm font-medium transition-colors">{texts.nextStep}</button>
+                  </div>
+                </div>
+                <div className="bg-slate-800/50 rounded-xl p-3 text-xs text-slate-400">💡 {texts.tip}</div>
+              </div>
+            </div>
+
+            {/* Credits */}
+            <div className="text-center text-slate-500 text-xs mt-4 pb-2 max-w-5xl mx-auto">
+              {texts.credits} <a href="https://www.ai-know.pro" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors">Paolo Dalprato</a>
+            </div>
+
+          {showModal && selectedPart && (
+            <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4" onClick={() => setShowModal(false)}>
+              <div className="bg-slate-800 rounded-2xl p-5 max-w-md w-full shadow-2xl border border-slate-600" onClick={e => e.stopPropagation()}>
+                <h2 className="text-xl font-bold text-red-400 mb-3">{texts.parts[selectedPart]?.name}</h2>
+                <p className="text-slate-200 leading-relaxed">{texts.parts[selectedPart]?.description}</p>
+                <button onClick={() => setShowModal(false)} className="mt-5 w-full bg-red-600 hover:bg-red-700 py-2.5 rounded-lg font-medium transition-colors">{texts.close}</button>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    ReactDOM.render(<HeartSimulator />, document.getElementById('root'));
+  </script>
+</body>
+</html>
