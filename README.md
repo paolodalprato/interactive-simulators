@@ -12,8 +12,8 @@ Make learning more accessible through interactive visualizations that allow you 
 
 | Simulator | Description | Link |
 |-----------|-------------|------|
-| [❤️ Heart](./heart/) | How the human heart works: the cardiac cycle in 7 steps | [Open](https://paolodalprato.github.io/interactive-simulators/heart/heart-simulator.html) |
-| [🌌 Gravity](./gravity/) | Explore gravitational attraction and emergent behavior from simple physical rules | [Open](https://paolodalprato.github.io/interactive-simulators/gravity/gravity-simulator.html) |
+| [❤️ Heart](./heart/) | How the human heart works: the cardiac cycle in 7 steps | <a href="https://paolodalprato.github.io/interactive-simulators/heart/heart-simulator.html" target="_blank">Open</a> |
+| [🌌 Gravity](./gravity/) | Explore gravitational attraction and emergent behavior from simple physical rules | <a href="https://paolodalprato.github.io/interactive-simulators/gravity/gravity-simulator.html" target="_blank">Open</a> |
 
 ## ✨ Common Features
 
@@ -90,15 +90,6 @@ You are free to use, modify, and distribute these simulators, even for commercia
 ## 🤝 Contributing
 
 Suggestions, corrections, and new ideas are welcome! Open an issue or a pull request.
-
-## 💡 Planned Simulators
-
-- 🫁 Respiratory system
-- 🧠 Neural signaling
-- ⚛️ Chemical reactions
-- 🔄 Water cycle
-- ⚡ Electrical circuits
-- 📊 Business processes
 
 *Have suggestions? Open an issue!*
 
