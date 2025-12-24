@@ -1,22 +1,22 @@
-# Simulatore gravità 2D | 2D Gravity Simulator
-
-Un simulatore interattivo per esplorare l'attrazione gravitazionale tra particelle e osservare la formazione di strutture complesse da regole semplici.
+# 2D Gravity Simulator
 
 An interactive simulator to explore gravitational attraction between particles and observe the formation of complex structures from simple rules.
 
-## 🎯 Cosa imparerai | What You'll Learn
+## 🎯 What You'll Learn
 
-Questo simulatore ti aiuta a comprendere | This simulator helps you understand:
-- La legge di gravitazione universale di Newton (F = G·m₁·m₂/r²)
-- Come comportamenti complessi emergono da regole semplici
-- La conservazione della quantità di moto nelle collisioni
-- L'effetto della costante gravitazionale sulla dinamica del sistema
+This simulator helps you understand:
 
-## 🚀 Provalo | Try It
+- Newton's law of universal gravitation (F = G·m₁·m₂/r²)
+- How complex behaviors emerge from simple rules
+- Conservation of momentum in collisions
+- The effect of the gravitational constant on system dynamics
 
-**Online**: [Visualizza simulatore](https://paolodalprato.github.io/interactive-simulators/gravity/gravity-simulator.html)
+## 🚀 Try It
 
-**Incorporalo nel tuo sito | Embed in your website**:
+**Online**: [View simulator](https://paolodalprato.github.io/interactive-simulators/gravity/gravity-simulator.html)
+
+**Embed in your website**:
+
 ```html
 <iframe 
   src="https://paolodalprato.github.io/interactive-simulators/gravity/gravity-simulator.html" 
@@ -27,91 +27,84 @@ Questo simulatore ti aiuta a comprendere | This simulator helps you understand:
 </iframe>
 ```
 
-## 🎮 Come usarlo | How to Use
+## 🎮 How to Use
 
-1. **Regola i parametri iniziali**: numero di particelle, velocità iniziale, costante gravitazionale G
-2. **Premi "Avvia"**: osserva le particelle che si attraggono e si fondono
-3. **Sperimenta**: cambia G durante la simulazione per vedere effetti immediati
-4. **Premi "Reset"**: ricomincia con nuove condizioni
+1. **Adjust initial parameters**: number of particles, initial velocity, gravitational constant G
+2. **Press "Start"**: observe particles attracting and merging
+3. **Experiment**: change G during simulation to see immediate effects
+4. **Press "Reset"**: restart with new conditions
 
-### Prova questi scenari | Try These Scenarios
+### Try These Scenarios
 
-**Formazione rapida di ammassi | Rapid cluster formation**:
+**Rapid cluster formation**:
+
 - G = 300-400
-- Particelle = 100-150
-- Velocità iniziale = 0,5
+- Particles = 100-150
+- Initial velocity = 0.5
 
-**Aggregazione lenta | Slow aggregation**:
+**Slow aggregation**:
+
 - G = 20-30
-- Particelle = 50
-- Velocità iniziale = 1,0
+- Particles = 50
+- Initial velocity = 1.0
 
-**Poche particelle tracciabili | Few trackable particles**:
+**Few trackable particles**:
+
 - G = 100
-- Particelle = 20-30
-- Velocità iniziale = 0,3
+- Particles = 20-30
+- Initial velocity = 0.3
 
-## 🔬 Caratteristiche principali | Key Features
+## 🔬 Key Features
 
-- **Fisica realistica**: implementazione accurata della legge di gravitazione universale
-- **Visualizzazione masse**: colori che variano dal rosso (massa piccola) al violetto (massa grande)
-- **Conservazione quantità di moto**: le collisioni rispettano le leggi fisiche
-- **Comportamento emergente**: strutture complesse emergono spontaneamente
-- **Parametri regolabili**: controllo completo su numero particelle, velocità e gravità
-- **Bilingue**: disponibile in italiano e inglese
+- **Realistic physics**: accurate implementation of universal gravitation law
+- **Mass visualization**: colors ranging from red (small mass) to violet (large mass)
+- **Momentum conservation**: collisions respect physical laws
+- **Emergent behavior**: complex structures emerge spontaneously
+- **Adjustable parameters**: full control over particle count, velocity, and gravity
+- **Bilingual**: available in Italian and English
 
-## 📚 Contesto didattico | Educational Context
+## 📚 Educational Context
 
-**Pubblico target | Target audience**: Studenti di scuola superiore e università, appassionati di fisica, insegnanti
+**Target audience**: High school and university students, physics enthusiasts, teachers
 
-**Prerequisiti | Prerequisites**: Conoscenza base di fisica (forze, massa, velocità)
+**Prerequisites**: Basic physics knowledge (forces, mass, velocity)
 
-**Casi d'uso | Use cases**:
-- Dimostrazioni in classe di fisica
-- Auto-apprendimento sulla gravitazione
-- Esplorazione del comportamento emergente nei sistemi fisici
-- Visualizzazione di concetti astratti di fisica
+**Use cases**:
 
-**Concetti dimostrati | Concepts demonstrated**:
-- Legge di gravitazione universale (F ∝ m₁·m₂/r²)
-- Dipendenza della forza dalla distanza (legge dell'inverso del quadrato)
-- Conservazione della massa e della quantità di moto
-- Comportamento emergente in sistemi complessi
-- Formazione di strutture per auto-aggregazione gravitazionale
+- Physics classroom demonstrations
+- Self-learning about gravitation
+- Exploring emergent behavior in physical systems
+- Visualizing abstract physics concepts
 
-**Misconcezioni comuni affrontate | Common misconceptions addressed**:
-- "La gravità agisce istantaneamente" → no, ma a questa scala la differenza è impercettibile
-- "Servono enormi masse per effetti gravitazionali visibili" → dipende dalla scala e dalla costante G
-- "Le collisioni cosmiche sono esplosive" → spesso sono fusioni che conservano momento
+**Concepts demonstrated**:
 
-## 🛠️ Dettagli tecnici | Technical Details
+- Universal gravitation law (F ∝ m₁·m₂/r²)
+- Distance dependence of force (inverse square law)
+- Conservation of mass and momentum
+- Emergent behavior in complex systems
+- Structure formation through gravitational self-aggregation
 
-- **Tecnologie | Technologies**: HTML5, React 18, Tailwind CSS, Canvas 2D
-- **Formato | Format**: File HTML singolo autosufficiente | Single self-contained HTML file
-- **Requisiti | Requirements**: Browser moderno (Chrome, Firefox, Safari, Edge)
-- **Mobile-friendly**: Ottimizzato per desktop, visualizzabile su mobile
+**Common misconceptions addressed**:
 
-**Fisica implementata | Physics implemented**:
-- Forza gravitazionale: F = G · m₁ · m₂ / r²
-- Integrazione numerica: metodo di Eulero con dt = 0,016s (60 FPS)
-- Collisioni: fusione perfettamente anelastica con conservazione quantità di moto
-- Bordi: rimbalzo con coefficiente di restituzione 0,8
+- "Gravity acts instantaneously" → no, but at this scale the difference is imperceptible
+- "Huge masses are needed for visible gravitational effects" → it depends on scale and constant G
+- "Cosmic collisions are explosive" → they're often mergers that conserve momentum
 
-## 📖 Fonti e riferimenti | Sources and References
+## 🛠️ Technical Details
 
-- Newton, I. (1687). *Philosophiæ Naturalis Principia Mathematica*
-- Goldstein, H., Poole, C., & Safko, J. (2002). *Classical Mechanics* (3rd ed.)
-- Concetti di sistemi complessi e comportamento emergente dalla teoria dei sistemi dinamici
+- **Technologies**: HTML5, React 18, Tailwind CSS, Canvas 2D
+- **Format**: Single self-contained HTML file
+- **Requirements**: Modern browser (Chrome, Firefox, Safari, Edge)
+- **Mobile-friendly**: Optimized for desktop, viewable on mobile
 
-## 📄 Licenza | License
-
-Licenza MIT - Libero di usare, modificare e distribuire con attribuzione.
+## 📄 License
 
 MIT License - Free to use, modify, and distribute with attribution.
 
-## 👤 Autore | Author
+## 👤 Author
 
 **Paolo Dalprato**
-- Sito web | Website: [ai-know.pro](https://ai-know.pro)
+
+- Website: [ai-know.pro](https://ai-know.pro)
 - Substack: [paolodalprato.substack.com](https://paolodalprato.substack.com)
 - GitHub: [@paolodalprato](https://github.com/paolodalprato)
