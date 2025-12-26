@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digestive System Simulator</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes glow {
+            0%, 100% { filter: drop-shadow(0 0 3px currentColor); }
+            50% { filter: drop-shadow(0 0 8px currentColor); }
+        }
+        .active-organ {
+            animation: glow 1.5s ease-in-out infinite;
+        }
+        .pellet {
+            transition: cx 1s ease-in-out, cy 0.8s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 min-h-screen">
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        
+        // ============================================
+        // DATA
+        // ============================================
+        
+        const foods = {
+            water: {
+                id: 'water',
+                icon: '💧',
+                nameEN: 'Water',
+                nameIT: 'Acqua',
+                phases: ['mouth', 'esophagus', 'stomach', 'small_intestine', 'complete'],
+                pellets: [
+                    { type: 'water', count: 12 }
+                ],
+                totalTime: '15-20 min'
+            },
+            apple: {
+                id: 'apple',
+                icon: '🍎',
+                nameEN: 'Apple',
+                nameIT: 'Mela',
+                phases: ['mouth', 'esophagus', 'stomach', 'small_intestine', 'large_intestine', 'complete'],
+                pellets: [
+                    { type: 'water', count: 4 },
+                    { type: 'carbs', count: 6 },
+                    { type: 'fiber', count: 5 }
+                ],
+                totalTime: '2-3 hours'
+            },
+            sandwich: {
+                id: 'sandwich',
+                icon: '🥪',
+                nameEN: 'Sandwich',
+                nameIT: 'Sandwich',
+                phases: ['mouth', 'esophagus', 'stomach', 'small_intestine', 'large_intestine', 'complete'],
+                pellets: [
+                    { type: 'water', count: 2 },
+                    { type: 'carbs', count: 8 },
+                    { type: 'protein', count: 6 },
+                    { type: 'fat', count: 4 },
+                    { type: 'fiber', count: 3 }
+                ],
+                totalTime: '4-6 hours'
+            },
+            salad: {
+                id: 'salad',
+                icon: '🥗',
+                nameEN: 'Salad',
+                nameIT: 'Insalata',
+                phases: ['mouth', 'esophagus', 'stomach', 'small_intestine', 'large_intestine', 'complete'],
+                pellets: [
+                    { type: 'water', count: 6 },
+                    { type: 'carbs', count: 2 },
+                    { type: 'fiber', count: 10 }
+                ],
+                totalTime: '4-5 hours'
+            },
+            cheese: {
+                id: 'cheese',
+                icon: '🧀',
+                nameEN: 'Cheese',
+                nameIT: 'Formaggio',
+                phases: ['mouth', 'esophagus', 'stomach', 'small_intestine', 'large_intestine', 'complete'],
+                pellets: [
+                    { type: 'water', count: 1 },
+                    { type: 'protein', count: 6 },
+                    { type: 'fat', count: 10 }
+                ],
+                totalTime: '5-7 hours'
+            },
+            feast: {
+                id: 'feast',
+                icon: '🍽️',
+                nameEN: 'Holiday Feast',
+                nameIT: 'Cenone',
+                phases: ['mouth', 'esophagus', 'stomach', 'small_intestine', 'large_intestine', 'complete'],
+                pellets: [
+                    { type: 'water', count: 3 },
+                    { type: 'carbs', count: 10 },
+                    { type: 'protein', count: 8 },
+                    { type: 'fat', count: 10 },
+                    { type: 'fiber', count: 4 }
+                ],
+                totalTime: '8-12 hours'
+            }
+        };
+        
+        const pelletTypes = {
+            water: { color: '#3B82F6', nameEN: 'Water', nameIT: 'Acqua', speed: 1.5 },
+            carbs: { color: '#EAB308', nameEN: 'Carbohydrates', nameIT: 'Carboidrati', speed: 1.0 },
+            protein: { color: '#EF4444', nameEN: 'Proteins', nameIT: 'Proteine', speed: 0.7 },
+            fat: { color: '#F97316', nameEN: 'Fats', nameIT: 'Grassi', speed: 0.4 },
+            fiber: { color: '#22C55E', nameEN: 'Fiber', nameIT: 'Fibre', speed: 0.3 }
+        };
+        
+        const phases = {
+            mouth: { nameEN: 'Mouth', nameIT: 'Bocca' },
+            esophagus: { nameEN: 'Esophagus', nameIT: 'Esofago' },
+            stomach: { nameEN: 'Stomach', nameIT: 'Stomaco' },
+            small_intestine: { nameEN: 'Small Intestine', nameIT: 'Intestino tenue' },
+            large_intestine: { nameEN: 'Large Intestine', nameIT: 'Intestino crasso' },
+            complete: { nameEN: 'Digestion Complete', nameIT: 'Digestione completata' }
+        };
+        
+        // Descrizioni specifiche per cibo e fase
+        const phaseDescriptions = {
+            water: {
+                mouth: {
+                    descEN: 'Water requires no chewing. It simply passes through the mouth, briefly mixing with saliva.',
+                    descIT: 'L\'acqua non richiede masticazione. Passa semplicemente attraverso la bocca, mescolandosi brevemente con la saliva.',
+                    durationEN: '1-2 seconds',
+                    durationIT: '1-2 secondi',
+                    actionEN: 'Swallowing reflex triggered',
+                    actionIT: 'Attivazione del riflesso di deglutizione'
+                },
+                esophagus: {
+                    descEN: 'Water flows quickly down the esophagus. Gravity helps, but peristaltic waves ensure it reaches the stomach even when lying down.',
+                    descIT: 'L\'acqua scorre rapidamente lungo l\'esofago. La gravità aiuta, ma le onde peristaltiche assicurano che raggiunga lo stomaco anche da sdraiati.',
+                    durationEN: '1-2 seconds',
+                    durationIT: '1-2 secondi',
+                    actionEN: 'Rapid transit via gravity and peristalsis',
+                    actionIT: 'Transito rapido per gravità e peristalsi'
+                },
+                stomach: {
+                    descEN: 'Water mostly bypasses the stomach. It passes through quickly, especially on an empty stomach, heading directly to the intestines.',
+                    descIT: 'L\'acqua bypassa per lo più lo stomaco. Passa rapidamente, specialmente a stomaco vuoto, dirigendosi direttamente verso l\'intestino.',
+                    durationEN: '5-15 minutes',
+                    durationIT: '5-15 minuti',
+                    actionEN: 'Minimal retention, quick passage',
+                    actionIT: 'Ritenzione minima, passaggio rapido'
+                },
+                small_intestine: {
+                    descEN: 'This is where water is absorbed. It passes through the intestinal wall into the bloodstream, hydrating your body within minutes.',
+                    descIT: 'È qui che l\'acqua viene assorbita. Passa attraverso la parete intestinale nel flusso sanguigno, idratando il corpo in pochi minuti.',
+                    durationEN: '5-10 minutes',
+                    durationIT: '5-10 minuti',
+                    actionEN: 'Rapid absorption into bloodstream',
+                    actionIT: 'Assorbimento rapido nel flusso sanguigno',
+                    exitsEN: ['Water → Blood → Entire body'],
+                    exitsIT: ['Acqua → Sangue → Tutto il corpo']
+                },
+                complete: {
+                    descEN: 'Water digestion is complete. Most water is now circulating in your blood, ready to hydrate cells throughout your body.',
+                    descIT: 'La digestione dell\'acqua è completata. La maggior parte dell\'acqua ora circola nel sangue, pronta a idratare le cellule di tutto il corpo.'
+                }
+            },
+            apple: {
+                mouth: {
+                    descEN: 'Teeth crush the apple into smaller pieces. Saliva contains amylase, which begins breaking down the apple\'s starches into simpler sugars. The fiber remains intact.',
+                    descIT: 'I denti frantumano la mela in pezzi più piccoli. La saliva contiene amilasi, che inizia a trasformare gli amidi della mela in zuccheri semplici. Le fibre restano intatte.',
+                    actionEN: 'Chewing + starch breakdown begins',
+                    actionIT: 'Masticazione + inizia scomposizione amidi'
+                },
+                esophagus: {
+                    descEN: 'The chewed apple (bolus) is pushed down by peristaltic waves. These muscular contractions move food regardless of body position.',
+                    descIT: 'La mela masticata (bolo) viene spinta verso il basso dalle onde peristaltiche. Queste contrazioni muscolari muovono il cibo indipendentemente dalla posizione del corpo.',
+                    durationEN: '5-8 seconds',
+                    durationIT: '5-8 secondi',
+                    actionEN: 'Peristaltic waves push bolus down',
+                    actionIT: 'Onde peristaltiche spingono il bolo'
+                },
+                stomach: {
+                    descEN: 'Gastric acids and enzymes continue breaking down the apple. Natural sugars are already simple, but proteins (minimal in apple) are processed here. Fiber passes through unchanged.',
+                    descIT: 'Acidi gastrici ed enzimi continuano a scomporre la mela. Gli zuccheri naturali sono già semplici, ma le proteine (minime nella mela) vengono elaborate qui. Le fibre passano inalterate.',
+                    durationEN: '1-2 hours',
+                    durationIT: '1-2 ore',
+                    actionEN: 'Acidic breakdown, fiber unchanged',
+                    actionIT: 'Scomposizione acida, fibre inalterate'
+                },
+                small_intestine: {
+                    descEN: 'Sugars (fructose, glucose) are absorbed into the bloodstream. Water from the apple is also absorbed. Fiber continues its journey, feeding beneficial bacteria along the way.',
+                    descIT: 'Gli zuccheri (fruttosio, glucosio) vengono assorbiti nel sangue. Anche l\'acqua della mela viene assorbita. Le fibre continuano il viaggio, nutrendo i batteri benefici lungo il percorso.',
+                    durationEN: '2-3 hours',
+                    durationIT: '2-3 ore',
+                    actionEN: 'Sugar and water absorption',
+                    actionIT: 'Assorbimento zuccheri e acqua',
+                    exitsEN: ['Sugars → Blood → Liver', 'Water → Blood'],
+                    exitsIT: ['Zuccheri → Sangue → Fegato', 'Acqua → Sangue']
+                },
+                large_intestine: {
+                    descEN: 'Fiber arrives here mostly intact. Gut bacteria ferment it, producing short-chain fatty acids that nourish colon cells. Remaining water is reabsorbed.',
+                    descIT: 'Le fibre arrivano qui perlopiù intatte. I batteri intestinali le fermentano, producendo acidi grassi a catena corta che nutrono le cellule del colon. L\'acqua residua viene riassorbita.',
+                    durationEN: '12-24 hours',
+                    durationIT: '12-24 ore',
+                    actionEN: 'Bacterial fermentation of fiber',
+                    actionIT: 'Fermentazione batterica delle fibre',
+                    exitsEN: ['Water → Blood', 'Short-chain fatty acids → Colon cells'],
+                    exitsIT: ['Acqua → Sangue', 'Acidi grassi a catena corta → Cellule del colon']
+                },
+                complete: {
+                    descEN: 'Apple digestion complete. Sugars were used for energy, water hydrated your body, and fiber fed your gut bacteria before being eliminated.',
+                    descIT: 'La digestione della mela è completata. Gli zuccheri sono stati usati per energia, l\'acqua ha idratato il corpo, e le fibre hanno nutrito i batteri intestinali prima di essere eliminate.'
+                }
+            },
+            sandwich: {
+                mouth: {
+                    descEN: 'Teeth cut and grind the sandwich. Bread starches begin breaking down via salivary amylase. Proteins and fats are not processed here, only mechanically broken into smaller pieces.',
+                    descIT: 'I denti tagliano e macinano il sandwich. Gli amidi del pane iniziano a scomporsi tramite l\'amilasi salivare. Proteine e grassi non vengono elaborati qui, solo frammentati meccanicamente.',
+                    actionEN: 'Thorough chewing required for mixed textures',
+                    actionIT: 'Masticazione accurata richiesta per texture miste'
+                },
+                esophagus: {
+                    descEN: 'The well-chewed bolus travels down. A properly chewed sandwich passes easily; poorly chewed chunks may cause discomfort.',
+                    descIT: 'Il bolo ben masticato scende. Un sandwich ben masticato passa facilmente; pezzi masticati male possono causare fastidio.',
+                    durationEN: '5-8 seconds',
+                    durationIT: '5-8 secondi',
+                    actionEN: 'Peristaltic transport of mixed bolus',
+                    actionIT: 'Trasporto peristaltico del bolo misto'
+                },
+                stomach: {
+                    descEN: 'Proteins from meat/cheese are broken down by pepsin in the acidic environment. Fats slow gastric emptying significantly. Salivary amylase continues starch breakdown until stomach acid deactivates it. This is a busy phase!',
+                    descIT: 'Le proteine di carne/formaggio vengono scomposte dalla pepsina nell\'ambiente acido. I grassi rallentano molto lo svuotamento gastrico. L\'amilasi salivare continua la scomposizione dell\'amido finché l\'acido gastrico non la disattiva. Questa è una fase intensa!',
+                    durationEN: '3-4 hours',
+                    durationIT: '3-4 ore',
+                    actionEN: 'Protein digestion, fats slow everything',
+                    actionIT: 'Digestione proteine, i grassi rallentano tutto'
+                },
+                small_intestine: {
+                    descEN: 'Maximum activity here. Pancreatic enzymes complete protein and carb digestion. Bile from the liver emulsifies fats for absorption. Nutrients enter blood (carbs, proteins) or lymphatic system (fats).',
+                    descIT: 'Massima attività qui. Enzimi pancreatici completano la digestione di proteine e carboidrati. La bile dal fegato emulsiona i grassi per l\'assorbimento. I nutrienti entrano nel sangue (carboidrati, proteine) o nel sistema linfatico (grassi).',
+                    durationEN: '3-5 hours',
+                    durationIT: '3-5 ore',
+                    actionEN: 'Complete breakdown and absorption',
+                    actionIT: 'Scomposizione completa e assorbimento',
+                    exitsEN: ['Sugars + Amino acids → Blood → Liver', 'Fats → Lymphatic system → Blood'],
+                    exitsIT: ['Zuccheri + Aminoacidi → Sangue → Fegato', 'Grassi → Sistema linfatico → Sangue']
+                },
+                large_intestine: {
+                    descEN: 'Fiber from bread and vegetables arrives here mostly intact. Water is reabsorbed into the bloodstream. Gut bacteria ferment the fiber, producing short-chain fatty acids. The material moves as a mass and is gradually compacted for elimination.',
+                    descIT: 'Le fibre da pane e verdure arrivano qui perlopiù intatte. L\'acqua viene riassorbita nel sangue. I batteri intestinali fermentano le fibre, producendo acidi grassi a catena corta. Il materiale si muove come massa e viene gradualmente compattato per l\'eliminazione.',
+                    durationEN: '12-36 hours',
+                    durationIT: '12-36 ore',
+                    actionEN: 'Water recovery, bacterial fermentation',
+                    actionIT: 'Recupero acqua, fermentazione batterica',
+                    exitsEN: ['Water → Blood'],
+                    exitsIT: ['Acqua → Sangue']
+                },
+                complete: {
+                    descEN: 'Sandwich digestion complete. Carbs provided quick energy, proteins supplied amino acids for muscles, and fats provided sustained energy and nutrient absorption.',
+                    descIT: 'Digestione del sandwich completata. I carboidrati hanno fornito energia rapida, le proteine aminoacidi per i muscoli, e i grassi energia prolungata e assorbimento nutrienti.'
+                }
+            },
+            salad: {
+                mouth: {
+                    descEN: 'Extensive chewing is needed to break down fibrous leaves. Little chemical digestion occurs since salad is mostly water and fiber with minimal starch.',
+                    descIT: 'È necessaria una masticazione prolungata per scomporre le foglie fibrose. Poca digestione chimica avviene poiché l\'insalata è principalmente acqua e fibre con amido minimo.',
+                    actionEN: 'Extensive chewing of fibrous material',
+                    actionIT: 'Masticazione prolungata di materiale fibroso'
+                },
+                esophagus: {
+                    descEN: 'Well-chewed salad passes easily. The high water content helps lubricate the passage.',
+                    descIT: 'L\'insalata ben masticata passa facilmente. L\'alto contenuto d\'acqua aiuta a lubrificare il passaggio.',
+                    durationEN: '5-8 seconds',
+                    durationIT: '5-8 secondi',
+                    actionEN: 'Easy passage due to high water content',
+                    actionIT: 'Passaggio facile grazie all\'alto contenuto d\'acqua'
+                },
+                stomach: {
+                    descEN: 'Relatively quick transit since there\'s little protein or fat to process. The stomach mainly mixes the material with gastric juices. Fiber is unaffected by stomach acid.',
+                    descIT: 'Transito relativamente veloce poiché ci sono poche proteine o grassi da elaborare. Lo stomaco principalmente mescola il materiale con i succhi gastrici. Le fibre non sono intaccate dall\'acido.',
+                    durationEN: '1-2 hours',
+                    durationIT: '1-2 ore',
+                    actionEN: 'Minimal processing, fiber passes through',
+                    actionIT: 'Elaborazione minima, le fibre passano'
+                },
+                small_intestine: {
+                    descEN: 'Water and the few available nutrients (vitamins, minerals, small amounts of sugars) are absorbed. Most fiber passes through undigested, but it slows transit and helps you feel full longer.',
+                    descIT: 'L\'acqua e i pochi nutrienti disponibili (vitamine, minerali, piccole quantità di zuccheri) vengono assorbiti. La maggior parte delle fibre passa indigerita, ma rallenta il transito e aiuta a sentirsi sazi più a lungo.',
+                    durationEN: '2-3 hours',
+                    durationIT: '2-3 ore',
+                    actionEN: 'Water and micronutrient absorption',
+                    actionIT: 'Assorbimento acqua e micronutrienti',
+                    exitsEN: ['Water + Vitamins → Blood'],
+                    exitsIT: ['Acqua + Vitamine → Sangue']
+                },
+                large_intestine: {
+                    descEN: 'This is where salad has its real impact. The abundant fiber feeds gut bacteria, promoting a healthy microbiome. Bacteria produce beneficial fatty acids. The bulk helps with regular bowel movements.',
+                    descIT: 'È qui che l\'insalata ha il suo vero impatto. Le abbondanti fibre nutrono i batteri intestinali, promuovendo un microbioma sano. I batteri producono acidi grassi benefici. Il volume aiuta la regolarità intestinale.',
+                    durationEN: '18-36 hours',
+                    durationIT: '18-36 ore',
+                    actionEN: 'Fiber fermentation, promotes gut health',
+                    actionIT: 'Fermentazione fibre, promuove salute intestinale',
+                    exitsEN: ['Water → Blood', 'Short-chain fatty acids → Colon cells'],
+                    exitsIT: ['Acqua → Sangue', 'Acidi grassi a catena corta → Cellule del colon']
+                },
+                complete: {
+                    descEN: 'Salad digestion complete. Despite low calories, salad provided hydration, vitamins, and crucial fiber that supports gut health and regular digestion.',
+                    descIT: 'Digestione dell\'insalata completata. Nonostante le poche calorie, l\'insalata ha fornito idratazione, vitamine e fibre cruciali che supportano la salute intestinale e la regolarità.'
+                }
+            },
+            cheese: {
+                mouth: {
+                    descEN: 'In the mouth, cheese is chewed. The high fat content would require more prolonged chewing. No significant chemical digestion occurs here.',
+                    descIT: 'In bocca il formaggio viene masticato. L\'alto contenuto di grassi richiederebbe una masticazione più prolungata. Non avviene nessuna digestione chimica significativa qui.',
+                    actionEN: 'Mechanical breakdown of fatty food',
+                    actionIT: 'Frammentazione meccanica di cibo grasso'
+                },
+                esophagus: {
+                    descEN: 'The chewed cheese passes down easily when well-masticated. Its compact nature means the bolus is denser than other foods.',
+                    descIT: 'Il formaggio masticato scende facilmente se ben sminuzzato. La sua natura compatta rende il bolo più denso rispetto ad altri cibi.',
+                    durationEN: '5-8 seconds',
+                    durationIT: '5-8 secondi',
+                    actionEN: 'Dense bolus transport',
+                    actionIT: 'Trasporto del bolo denso'
+                },
+                stomach: {
+                    descEN: 'This is where cheese digestion really slows down. The high fat content significantly delays gastric emptying. Pepsin starts breaking down casein and other milk proteins in the acidic environment. You may feel full for a long time.',
+                    descIT: 'È qui che la digestione del formaggio rallenta davvero. L\'alto contenuto di grassi ritarda significativamente lo svuotamento gastrico. La pepsina inizia a scomporre la caseina e altre proteine del latte nell\'ambiente acido. Potresti sentirti sazio a lungo.',
+                    durationEN: '3-5 hours',
+                    durationIT: '3-5 ore',
+                    actionEN: 'Slow emptying due to high fat',
+                    actionIT: 'Svuotamento lento per l\'alto contenuto di grassi'
+                },
+                small_intestine: {
+                    descEN: 'Bile from the liver is essential here to emulsify the abundant fats. Pancreatic lipase then breaks them into absorbable fatty acids. Proteins are fully digested into amino acids. Fats enter the lymphatic system, while amino acids go directly to the blood.',
+                    descIT: 'La bile dal fegato è essenziale qui per emulsionare i grassi abbondanti. La lipasi pancreatica li scompone poi in acidi grassi assorbibili. Le proteine vengono completamente digerite in aminoacidi. I grassi entrano nel sistema linfatico, mentre gli aminoacidi vanno direttamente nel sangue.',
+                    durationEN: '3-5 hours',
+                    durationIT: '3-5 ore',
+                    actionEN: 'Intensive fat processing',
+                    actionIT: 'Elaborazione intensiva dei grassi',
+                    exitsEN: ['Amino acids → Blood → Liver', 'Fats → Lymphatic system → Blood'],
+                    exitsIT: ['Aminoacidi → Sangue → Fegato', 'Grassi → Sistema linfatico → Sangue']
+                },
+                large_intestine: {
+                    descEN: 'Very little reaches here from cheese - most nutrients have been absorbed. Any remaining undigested proteins or fats are processed by gut bacteria. Water is reabsorbed. Cheese typically produces minimal fecal residue.',
+                    descIT: 'Dal formaggio arriva molto poco qui - la maggior parte dei nutrienti è stata assorbita. Eventuali proteine o grassi non digeriti vengono elaborati dai batteri intestinali. L\'acqua viene riassorbita. Il formaggio produce tipicamente residui fecali minimi.',
+                    durationEN: '12-24 hours',
+                    durationIT: '12-24 ore',
+                    actionEN: 'Minimal residue processing',
+                    actionIT: 'Elaborazione di residui minimi',
+                    exitsEN: ['Water → Blood'],
+                    exitsIT: ['Acqua → Sangue']
+                },
+                complete: {
+                    descEN: 'Cheese digestion complete. The high fat and protein content provided sustained energy and essential amino acids, but required significant digestive effort and time.',
+                    descIT: 'Digestione del formaggio completata. L\'alto contenuto di grassi e proteine ha fornito energia prolungata e aminoacidi essenziali, ma ha richiesto uno sforzo digestivo significativo e molto tempo.'
+                }
+            },
+            feast: {
+                mouth: {
+                    descEN: 'A holiday feast means many textures and types of food. Extended chewing time is needed. Salivary amylase works on starches from bread, potatoes, and desserts.',
+                    descIT: 'Un cenone significa molte texture e tipi di cibo. È necessario un tempo di masticazione prolungato. L\'amilasi salivare lavora sugli amidi di pane, patate e dolci.',
+                    actionEN: 'Extended chewing for complex meal',
+                    actionIT: 'Masticazione prolungata per pasto complesso'
+                },
+                esophagus: {
+                    descEN: 'Multiple swallowing events as you eat course after course. The esophagus works overtime during a feast.',
+                    descIT: 'Multipli eventi di deglutizione mentre mangi portata dopo portata. L\'esofago lavora senza sosta durante un cenone.',
+                    durationEN: '5-8 seconds per swallow',
+                    durationIT: '5-8 secondi per deglutizione',
+                    actionEN: 'Repeated transport of varied foods',
+                    actionIT: 'Trasporto ripetuto di cibi vari'
+                },
+                stomach: {
+                    descEN: 'The stomach is working at maximum capacity. High fat content (butter, oil, fatty meats) dramatically slows emptying. Proteins require extensive processing. You may feel "stuffed" for hours.',
+                    descIT: 'Lo stomaco lavora a pieno regime. L\'alto contenuto di grassi (burro, olio, carni grasse) rallenta drasticamente lo svuotamento. Le proteine richiedono elaborazione estesa. Potresti sentirti «pieno» per ore.',
+                    durationEN: '4-6 hours',
+                    durationIT: '4-6 ore',
+                    actionEN: 'Overloaded! Fats slow everything significantly',
+                    actionIT: 'Sovraccarico! I grassi rallentano tutto significativamente'
+                },
+                small_intestine: {
+                    descEN: 'All systems at full capacity. Massive amounts of nutrients being absorbed: sugars from desserts, amino acids from meats, fats requiring extra bile. The liver and pancreas work overtime.',
+                    descIT: 'Tutti i sistemi a pieno regime. Enormi quantità di nutrienti da assorbire: zuccheri dai dolci, aminoacidi dalle carni, grassi che richiedono bile extra. Fegato e pancreas lavorano senza sosta.',
+                    durationEN: '5-8 hours',
+                    durationIT: '5-8 ore',
+                    actionEN: 'Maximum absorption activity',
+                    actionIT: 'Massima attività di assorbimento',
+                    exitsEN: ['Sugars + Amino acids → Blood → Liver (working hard!)', 'Fats → Lymphatic system → Blood', 'Excess may be stored as fat'],
+                    exitsIT: ['Zuccheri + Aminoacidi → Sangue → Fegato (lavora duro!)', 'Grassi → Sistema linfatico → Sangue', 'L\'eccesso può essere immagazzinato come grasso']
+                },
+                large_intestine: {
+                    descEN: 'After the feast, a significant mass of material arrives here. Water reabsorption is crucial. Gut bacteria work on the remaining fiber. The large volume means longer transit time as the material moves through as a mass, contributing to the prolonged feeling of fullness.',
+                    descIT: 'Dopo il cenone, una massa significativa di materiale arriva qui. Il riassorbimento dell\'acqua è cruciale. I batteri intestinali lavorano sulle fibre residue. Il grande volume significa un tempo di transito più lungo mentre il materiale si muove come massa, contribuendo alla prolungata sensazione di pienezza.',
+                    durationEN: '24-48 hours',
+                    durationIT: '24-48 ore',
+                    actionEN: 'Extended processing of large volume',
+                    actionIT: 'Elaborazione prolungata di grande volume',
+                    exitsEN: ['Water → Blood'],
+                    exitsIT: ['Acqua → Sangue']
+                },
+                complete: {
+                    descEN: 'Feast digestion finally complete! Your body processed enormous amounts of carbs, proteins, and fats. Excess calories have been stored. This is why post-holiday walks help!',
+                    descIT: 'Digestione del cenone finalmente completata! Il tuo corpo ha elaborato enormi quantità di carboidrati, proteine e grassi. Le calorie in eccesso sono state immagazzinate. Ecco perché le passeggiate post-feste aiutano!'
+                }
+            }
+        };
+        
+        const texts = {
+            en: {
+                title: 'Digestive System Simulator',
+                subtitle: 'Follow food through the digestive tract',
+                selectFood: 'Select food',
+                phase: 'Phase',
+                of: 'of',
+                next: 'Next Phase →',
+                restart: 'Restart',
+                legend: 'Legend',
+                currentPhase: 'Current phase',
+                duration: 'Duration',
+                action: 'What happens',
+                exits: 'Nutrients exit to',
+                totalTime: 'Total digestion time',
+                complete: 'Digestion complete!',
+                tryAnother: 'Try another food',
+                credits: 'Created by',
+                note: 'Note: This is a simplified educational model. Actual digestion times vary based on individual factors and food combinations.'
+            },
+            it: {
+                title: 'Simulatore dell\'apparato digerente',
+                subtitle: 'Segui il cibo attraverso il tratto digestivo',
+                selectFood: 'Seleziona cibo',
+                phase: 'Fase',
+                of: 'di',
+                next: 'Fase successiva →',
+                restart: 'Ricomincia',
+                legend: 'Legenda',
+                currentPhase: 'Fase attuale',
+                duration: 'Durata',
+                action: 'Cosa succede',
+                exits: 'I nutrienti escono verso',
+                totalTime: 'Tempo totale digestione',
+                complete: 'Digestione completata!',
+                tryAnother: 'Prova un altro cibo',
+                credits: 'Creato da',
+                note: 'Nota: Questo è un modello educativo semplificato. I tempi reali di digestione variano in base a fattori individuali e combinazioni di cibi.'
+            }
+        };
+        
+        // ============================================
+        // PELLET COMPONENT
+        // ============================================
+        
+        const Pellet = ({ x, y, type, absorbed, size = 8, exitDirection }) => {
+            const pelletInfo = pelletTypes[type];
+            
+            // Calculate exit position - move far enough to exit viewBox
+            let finalX = x;
+            if (absorbed && exitDirection) {
+                if (exitDirection === 'right') {
+                    finalX = 500; // Exit right side of viewBox (450 wide)
+                } else if (exitDirection === 'left') {
+                    finalX = -50; // Exit left side of viewBox
+                }
+            }
+            
+            return (
+                <circle
+                    cx={finalX}
+                    cy={y}
+                    r={size}
+                    fill={pelletInfo.color}
+                    className="pellet"
+                    style={{ 
+                        transition: 'cx 1s ease-in-out, cy 0.8s ease-in-out'
+                    }}
+                />
+            );
+        };
+        
+        // ============================================
+        // DIGESTIVE TRACT SVG
+        // ============================================
+        
+        const DigestiveTract = ({ currentPhase, pellets, food, language, chewFrame }) => {
+            const phaseIndex = food ? food.phases.indexOf(currentPhase) : -1;
+            
+            // Determine which organs are active (current or past)
+            const isActive = (phase) => {
+                if (!food) return false;
+                const idx = food.phases.indexOf(phase);
+                return idx !== -1 && idx <= phaseIndex;
+            };
+            
+            const isCurrent = (phase) => phase === currentPhase;
+            
+            // Chewing animation offset
+            const chewOffset = chewFrame ? 8 : 0;
+            
+            return (
+                <svg viewBox="0 0 450 730" className="w-full max-w-md mx-auto">
+                    <defs>
+                        <linearGradient id="acidGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stopColor="#FDE047" stopOpacity="0.3" />
+                            <stop offset="100%" stopColor="#CA8A04" stopOpacity="0.5" />
+                        </linearGradient>
+                    </defs>
+                    
+                    {/* Background */}
+                    <rect x="0" y="0" width="450" height="750" fill="#1a1a2e" rx="10" />
+                    
+                    {/* === MOUTH === */}
+                    <g className="organ">
+                        {/* Mouth as a sack - always keeps its shape, top and bottom move for chewing */}
+                        <path
+                            d={`M100 ${35 + chewOffset} 
+                                Q90 ${35 + chewOffset} 90 50 
+                                Q90 ${65 - chewOffset} 100 ${65 - chewOffset} 
+                                L190 ${65 - chewOffset} 
+                                Q200 ${65 - chewOffset} 200 50 
+                                Q200 ${35 + chewOffset} 190 ${35 + chewOffset} 
+                                Z`}
+                            fill={isActive('mouth') ? '#F87171' : '#4B5563'}
+                            stroke={isCurrent('mouth') ? '#3B82F6' : 'none'}
+                            strokeWidth={isCurrent('mouth') ? 4 : 0}
+                            className={isCurrent('mouth') ? 'active-organ' : ''}
+                        />
+                        {/* External opening (left) - always visible */}
+                        <ellipse cx="90" cy="50" rx="6" ry="12" fill="#1a1a2e" />
+                        {/* Label outside */}
+                        <text x="50" y="55" textAnchor="end" fill={isCurrent('mouth') ? '#3B82F6' : '#9CA3AF'} fontSize="11" fontWeight={isCurrent('mouth') ? 'bold' : 'normal'}>
+                            {language === 'it' ? 'BOCCA' : 'MOUTH'}
+                        </text>
+                    </g>
+                    
+                    {/* Connection mouth to esophagus (90° curve) */}
+                    <path
+                        d="M200 50 Q240 50 240 90 L240 120"
+                        fill="none"
+                        stroke={isActive('esophagus') ? '#F87171' : '#4B5563'}
+                        strokeWidth="20"
+                    />
+                    
+                    {/* === ESOPHAGUS === */}
+                    <g className="organ">
+                        {/* Extended to connect with stomach (y=120 to y=235) */}
+                        <rect
+                            x="230"
+                            y="120"
+                            width="20"
+                            height="115"
+                            fill={isActive('esophagus') ? '#F87171' : '#4B5563'}
+                            stroke={isCurrent('esophagus') ? '#3B82F6' : 'none'}
+                            strokeWidth={isCurrent('esophagus') ? 4 : 0}
+                            className={isCurrent('esophagus') ? 'active-organ' : ''}
+                        />
+                        <text x="270" y="180" fill={isCurrent('esophagus') ? '#3B82F6' : '#9CA3AF'} fontSize="11" fontWeight={isCurrent('esophagus') ? 'bold' : 'normal'}>
+                            {language === 'it' ? 'ESOFAGO' : 'ESOPHAGUS'}
+                        </text>
+                    </g>
+                    
+                    {/* === STOMACH === */}
+                    <g className="organ">
+                        <ellipse
+                            cx="240"
+                            cy="300"
+                            rx="55"
+                            ry="65"
+                            fill={isActive('stomach') ? 'url(#acidGradient)' : '#4B5563'}
+                            stroke={isCurrent('stomach') ? '#3B82F6' : 'none'}
+                            strokeWidth={isCurrent('stomach') ? 4 : 0}
+                            className={isCurrent('stomach') ? 'active-organ' : ''}
+                        />
+                        {/* Labels outside stomach */}
+                        <text x="320" y="290" fill={isCurrent('stomach') ? '#3B82F6' : '#9CA3AF'} fontSize="11" fontWeight={isCurrent('stomach') ? 'bold' : 'normal'}>
+                            {language === 'it' ? 'STOMACO' : 'STOMACH'}
+                        </text>
+                        {isCurrent('stomach') && (
+                            <text x="320" y="305" fill="#FDE047" fontSize="10">
+                                pH 1.5-3.5
+                            </text>
+                        )}
+                    </g>
+                    
+                    {/* Connection stomach to small intestine */}
+                    <path
+                        d="M240 365 L240 385"
+                        stroke={isActive('small_intestine') ? '#FB923C' : '#4B5563'}
+                        strokeWidth="20"
+                    />
+                    
+                    {/* === SMALL INTESTINE === */}
+                    <g className="organ">
+                        {/* Wavy tube representing small intestine */}
+                        <path
+                            d="M240 385 
+                               Q180 410 180 450 
+                               Q180 490 240 490 
+                               Q300 490 300 530 
+                               Q300 570 240 570"
+                            fill="none"
+                            stroke={isActive('small_intestine') ? '#FB923C' : '#4B5563'}
+                            strokeWidth="24"
+                            strokeLinecap="round"
+                        />
+                        {isCurrent('small_intestine') && (
+                            <path
+                                d="M240 385 Q180 410 180 450 Q180 490 240 490 Q300 490 300 530 Q300 570 240 570"
+                                fill="none"
+                                stroke="#3B82F6"
+                                strokeWidth="30"
+                                strokeOpacity="0.3"
+                                strokeLinecap="round"
+                            />
+                        )}
+                        
+                        {/* Label for small intestine - positioned to the right in upper concave area */}
+                        <text x="320" y="420" fill={isCurrent('small_intestine') ? '#3B82F6' : '#9CA3AF'} fontSize="10" fontWeight={isCurrent('small_intestine') ? 'bold' : 'normal'}>
+                            {language === 'it' ? 'INTESTINO' : 'SMALL'}
+                        </text>
+                        <text x="320" y="435" fill={isCurrent('small_intestine') ? '#3B82F6' : '#9CA3AF'} fontSize="10" fontWeight={isCurrent('small_intestine') ? 'bold' : 'normal'}>
+                            {language === 'it' ? 'TENUE' : 'INTESTINE'}
+                        </text>
+                        
+                        {/* Input arrow for bile - on the left side */}
+                        {isCurrent('small_intestine') && (
+                            <g className="input-arrow">
+                                <path d="M130 450 L165 450" stroke="#84CC16" strokeWidth="2" markerEnd="url(#arrowLime)" />
+                                <text x="80" y="445" fill="#84CC16" fontSize="9">
+                                    {language === 'it' ? 'Bile' : 'Bile'}
+                                </text>
+                                <text x="80" y="460" fill="#84CC16" fontSize="9">
+                                    {language === 'it' ? '(dal fegato)' : '(from liver)'}
+                                </text>
+                            </g>
+                        )}
+                        
+                        {/* Exit arrows for small intestine - positioned to the right */}
+                        {isCurrent('small_intestine') && (
+                            <g className="exit-arrow">
+                                <path d="M320 490 L370 490" stroke="#22C55E" strokeWidth="2" markerEnd="url(#arrowGreen)" />
+                                <text x="375" y="485" fill="#22C55E" fontSize="9">
+                                    {language === 'it' ? 'Sangue → Fegato' : 'Blood → Liver'}
+                                </text>
+                                
+                                <path d="M320 530 L370 530" stroke="#F97316" strokeWidth="2" markerEnd="url(#arrowOrange)" />
+                                <text x="375" y="535" fill="#F97316" fontSize="9">
+                                    {language === 'it' ? 'Sist. linfatico (grassi)' : 'Lymphatic sys. (fats)'}
+                                </text>
+                            </g>
+                        )}
+                    </g>
+                    
+                    {/* Arrow markers */}
+                    <defs>
+                        <marker id="arrowGreen" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#22C55E" />
+                        </marker>
+                        <marker id="arrowOrange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#F97316" />
+                        </marker>
+                        <marker id="arrowLime" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#84CC16" />
+                        </marker>
+                        <marker id="arrowBlue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#3B82F6" />
+                        </marker>
+                        <marker id="arrowBlueLeft" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto">
+                            <polygon points="10 0, 0 3.5, 10 7" fill="#3B82F6" />
+                        </marker>
+                    </defs>
+                    
+                    {/* === LARGE INTESTINE === */}
+                    <g className="organ">
+                        {/* U-shaped large intestine - tube style like small intestine */}
+                        <path
+                            d="M240 570 
+                               L120 570 
+                               Q90 570 90 600 
+                               L90 670 
+                               Q90 700 120 700 
+                               L340 700 
+                               Q370 700 370 670 
+                               L370 640"
+                            fill="none"
+                            stroke={isActive('large_intestine') ? '#A78BFA' : '#4B5563'}
+                            strokeWidth="24"
+                            strokeLinecap="round"
+                        />
+                        {/* Highlight glow - same pattern as small intestine */}
+                        {isCurrent('large_intestine') && (
+                            <path
+                                d="M240 570 L120 570 Q90 570 90 600 L90 670 Q90 700 120 700 L340 700 Q370 700 370 670 L370 640"
+                                fill="none"
+                                stroke="#3B82F6"
+                                strokeWidth="30"
+                                strokeOpacity="0.3"
+                                strokeLinecap="round"
+                            />
+                        )}
+                        
+                        {/* Label for large intestine */}
+                        <text x="230" y="725" textAnchor="middle" fill={isCurrent('large_intestine') ? '#3B82F6' : '#9CA3AF'} fontSize="10" fontWeight={isCurrent('large_intestine') ? 'bold' : 'normal'}>
+                            {language === 'it' ? 'INTESTINO CRASSO' : 'LARGE INTESTINE'}
+                        </text>
+                        
+                        {/* Exit arrow for water reabsorption - on the right side */}
+                        {isCurrent('large_intestine') && (
+                            <g className="exit-arrow">
+                                <path d="M385 670 L420 670" stroke="#3B82F6" strokeWidth="2" markerEnd="url(#arrowBlue)" />
+                                <text x="390" y="660" fill="#3B82F6" fontSize="9">
+                                    {language === 'it' ? 'Acqua' : 'Water'}
+                                </text>
+                                <text x="390" y="685" fill="#3B82F6" fontSize="9">
+                                    → {language === 'it' ? 'Sangue' : 'Blood'}
+                                </text>
+                            </g>
+                        )}
+                    </g>
+                    
+                    {/* === EXIT === */}
+                    <g>
+                        <rect x="360" y="625" width="20" height="30" fill="#4B5563" rx="3" />
+                        <text x="395" y="645" fill="#6B7280" fontSize="9">
+                            {language === 'it' ? 'Uscita' : 'Exit'}
+                        </text>
+                    </g>
+                    
+                    {/* === PELLETS === */}
+                    {pellets.map((pellet, index) => (
+                        <Pellet
+                            key={index}
+                            x={pellet.x}
+                            y={pellet.y}
+                            type={pellet.type}
+                            absorbed={pellet.absorbed}
+                            size={pellet.size || 6}
+                            exitDirection={pellet.exitDirection}
+                        />
+                    ))}
+                </svg>
+            );
+        };
+        
+        // ============================================
+        // MAIN SIMULATOR COMPONENT
+        // ============================================
+        
+        const DigestiveSimulator = () => {
+            const [language, setLanguage] = useState('en');
+            const [selectedFood, setSelectedFood] = useState(null);
+            const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
+            const [pellets, setPellets] = useState([]);
+            const [chewFrame, setChewFrame] = useState(false);
+            
+            const t = texts[language];
+            const currentPhase = selectedFood ? selectedFood.phases[currentPhaseIndex] : null;
+            
+            // Chewing animation
+            useEffect(() => {
+                if (currentPhase === 'mouth' && selectedFood && selectedFood.id !== 'water') {
+                    const interval = setInterval(() => {
+                        setChewFrame(prev => !prev);
+                    }, 400);
+                    return () => clearInterval(interval);
+                }
+            }, [currentPhase, selectedFood]);
+            
+            // Initialize pellets for a food
+            const initializePellets = (food) => {
+                const newPellets = [];
+                let offsetX = 0;
+                
+                food.pellets.forEach(pelletDef => {
+                    for (let i = 0; i < pelletDef.count; i++) {
+                        // Grid layout in mouth
+                        const cols = 4;
+                        const spacing = 14;
+                        const col = offsetX % cols;
+                        const row = Math.floor(offsetX / cols);
+                        
+                        newPellets.push({
+                            type: pelletDef.type,
+                            x: 120 + col * spacing,
+                            y: 42 + row * spacing,
+                            absorbed: false,
+                            size: 6
+                        });
+                        offsetX++;
+                    }
+                });
+                
+                return newPellets;
+            };
+            
+            // Move pellets to phase position
+            const movePelletsToPhase = (phase, currentPellets) => {
+                const positions = {
+                    mouth: { x: 145, y: 50, spread: 25 },
+                    esophagus: { x: 240, y: 180, spread: 6 },
+                    stomach: { x: 240, y: 300, spread: 35 },
+                    small_intestine: { x: 240, y: 490, spread: 30 },
+                    large_intestine: { x: 220, y: 700, spread: 30 },
+                    complete: { x: 370, y: 660, spread: 8 }
+                };
+                
+                const pos = positions[phase];
+                if (!pos) return currentPellets;
+                
+                const nonAbsorbedPellets = currentPellets.filter(p => !p.absorbed);
+                
+                return currentPellets.map((pellet, index) => {
+                    if (pellet.absorbed) return pellet;
+                    
+                    const nonAbsorbedIndex = nonAbsorbedPellets.indexOf(pellet);
+                    
+                    let x, y;
+                    
+                    if (phase === 'complete') {
+                        // Grid layout for remaining pellets at exit - similar to mouth
+                        const cols = 4;
+                        const spacing = 14;
+                        const col = nonAbsorbedIndex % cols;
+                        const row = Math.floor(nonAbsorbedIndex / cols);
+                        x = pos.x + col * spacing - (cols * spacing / 2) + spacing / 2;
+                        y = pos.y + row * spacing;
+                    } else {
+                        // Circular spread for other phases
+                        const angle = (nonAbsorbedIndex / nonAbsorbedPellets.length) * Math.PI * 2;
+                        const distance = Math.random() * pos.spread;
+                        x = pos.x + Math.cos(angle) * distance;
+                        y = pos.y + Math.sin(angle) * distance * 0.3;
+                    }
+                    
+                    return {
+                        ...pellet,
+                        x: x,
+                        y: y
+                    };
+                });
+            };
+            
+            // Handle absorption based on phase
+            const handleAbsorption = (phase, currentPellets, foodId) => {
+                if (phase === 'small_intestine') {
+                    return currentPellets.map(pellet => {
+                        // Pure water (water food) is fully absorbed in small intestine
+                        if (foodId === 'water' && pellet.type === 'water') {
+                            return { ...pellet, absorbed: true, exitDirection: 'right' };
+                        }
+                        // Water in other foods: only partial absorption here (about 50%)
+                        if (pellet.type === 'water' && Math.random() > 0.5) {
+                            return { ...pellet, absorbed: true, exitDirection: 'right' };
+                        }
+                        // Carbs, proteins, fats absorbed with high probability
+                        if (['carbs', 'protein', 'fat'].includes(pellet.type) && Math.random() > 0.3) {
+                            return { ...pellet, absorbed: true, exitDirection: 'right' };
+                        }
+                        return pellet;
+                    });
+                }
+                
+                if (phase === 'large_intestine') {
+                    // Remaining water from food gets absorbed here
+                    return currentPellets.map(pellet => {
+                        if (pellet.type === 'water' && !pellet.absorbed) {
+                            return { ...pellet, absorbed: true, exitDirection: 'right' };
+                        }
+                        return pellet;
+                    });
+                }
+                
+                return currentPellets;
+            };
+            
+            // Select food
+            const handleSelectFood = (foodId) => {
+                const food = foods[foodId];
+                setSelectedFood(food);
+                setCurrentPhaseIndex(0);
+                setPellets(initializePellets(food));
+            };
+            
+            // Next phase
+            const handleNextPhase = () => {
+                if (!selectedFood) return;
+                
+                const nextIndex = currentPhaseIndex + 1;
+                if (nextIndex >= selectedFood.phases.length) return;
+                
+                const nextPhase = selectedFood.phases[nextIndex];
+                setCurrentPhaseIndex(nextIndex);
+                
+                // First: move pellets to new position
+                setPellets(prev => movePelletsToPhase(nextPhase, prev));
+                
+                // Then: after a delay, absorb the ones that should be absorbed
+                setTimeout(() => {
+                    setPellets(prev => handleAbsorption(nextPhase, prev, selectedFood.id));
+                }, 600);
+            };
+            
+            // Restart
+            const handleRestart = () => {
+                setSelectedFood(null);
+                setCurrentPhaseIndex(0);
+                setPellets([]);
+            };
+            
+            // Get phase-specific info
+            const getPhaseInfo = () => {
+                if (!selectedFood || !currentPhase) return null;
+                const foodDesc = phaseDescriptions[selectedFood.id];
+                if (!foodDesc) return null;
+                return foodDesc[currentPhase];
+            };
+            
+            const phaseInfo = getPhaseInfo();
+            const phaseName = currentPhase ? phases[currentPhase] : null;
+            
+            return (
+                <div className="min-h-screen bg-gray-900 text-white p-4">
+                    <div className="max-w-6xl mx-auto">
+                        {/* Header */}
+                        <div className="flex justify-between items-center mb-6">
+                            <div>
+                                <h1 className="text-2xl font-bold">{t.title}</h1>
+                                <p className="text-gray-400 text-sm">{t.subtitle}</p>
+                            </div>
+                            <button
+                                onClick={() => setLanguage(language === 'en' ? 'it' : 'en')}
+                                className="px-3 py-1 bg-gray-700 rounded-lg text-sm hover:bg-gray-600 transition"
+                            >
+                                {language === 'en' ? '🇮🇹 Italiano' : '🇬🇧 English'}
+                            </button>
+                        </div>
+                        
+                        {/* Food Selection */}
+                        {!selectedFood && (
+                            <div className="bg-gray-800 rounded-xl p-6 mb-6">
+                                <h2 className="text-lg font-semibold mb-4">{t.selectFood}</h2>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                                    {Object.values(foods).map(food => (
+                                        <button
+                                            key={food.id}
+                                            onClick={() => handleSelectFood(food.id)}
+                                            className="flex flex-col items-center p-4 bg-gray-700 rounded-xl hover:bg-gray-600 transition"
+                                        >
+                                            <span className="text-3xl mb-2">{food.icon}</span>
+                                            <span className="text-sm">{language === 'it' ? food.nameIT : food.nameEN}</span>
+                                            <span className="text-xs text-gray-400 mt-1">{food.totalTime}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        
+                        {/* Simulator */}
+                        {selectedFood && (
+                            <div className="grid md:grid-cols-2 gap-6">
+                                {/* Visualization */}
+                                <div className="bg-gray-800 rounded-xl p-4">
+                                    <DigestiveTract
+                                        currentPhase={currentPhase}
+                                        pellets={pellets}
+                                        food={selectedFood}
+                                        language={language}
+                                        chewFrame={chewFrame}
+                                    />
+                                    
+                                    {/* Legend */}
+                                    <div className="mt-4 pt-4 border-t border-gray-700">
+                                        <p className="text-sm text-gray-400 mb-2">{t.legend}</p>
+                                        <div className="flex flex-wrap gap-3">
+                                            {Object.entries(pelletTypes).map(([key, info]) => (
+                                                <div key={key} className="flex items-center gap-1">
+                                                    <div 
+                                                        className="w-3 h-3 rounded-full" 
+                                                        style={{ backgroundColor: info.color }}
+                                                    />
+                                                    <span className="text-xs text-gray-300">
+                                                        {language === 'it' ? info.nameIT : info.nameEN}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {/* Info panel */}
+                                <div className="space-y-4">
+                                    
+                                    {/* Phase indicator */}
+                                    <div className="bg-gray-800 rounded-xl p-4">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <span className="text-gray-400 text-sm">
+                                                {t.phase} {currentPhaseIndex + 1} {t.of} {selectedFood.phases.length}
+                                            </span>
+                                            <span className="text-sm">
+                                                <span className="text-gray-500">{t.totalTime}: </span>
+                                                <span className="text-white">{selectedFood.totalTime}</span>
+                                            </span>
+                                        </div>
+                                        
+                                        {/* Progress bar */}
+                                        <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                                            <div
+                                                className="h-full bg-blue-500 transition-all duration-500"
+                                                style={{ width: `${((currentPhaseIndex + 1) / selectedFood.phases.length) * 100}%` }}
+                                            />
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Phase info */}
+                                    {phaseInfo && currentPhase !== 'complete' && (
+                                        <div className="bg-gray-800 rounded-xl p-4">
+                                            <h3 className="text-xl font-bold text-white mb-2">
+                                                {language === 'it' ? phaseName.nameIT : phaseName.nameEN}
+                                            </h3>
+                                            
+                                            <p className="text-gray-300 text-sm mb-4">
+                                                {language === 'it' ? phaseInfo.descIT : phaseInfo.descEN}
+                                            </p>
+                                            
+                                            {phaseInfo.durationEN && (
+                                                <div className="mb-2">
+                                                    <span className="text-gray-500 text-sm">{t.duration}: </span>
+                                                    <span className="text-white text-sm">
+                                                        {language === 'it' ? phaseInfo.durationIT : phaseInfo.durationEN}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            
+                                            {phaseInfo.actionEN && (
+                                                <div className="bg-gray-700 rounded-lg p-3 mb-3">
+                                                    <p className="text-blue-400 text-sm font-medium">
+                                                        {language === 'it' ? phaseInfo.actionIT : phaseInfo.actionEN}
+                                                    </p>
+                                                </div>
+                                            )}
+                                            
+                                            {phaseInfo.exitsEN && phaseInfo.exitsEN.length > 0 && (
+                                                <div className="bg-green-900/30 rounded-lg p-3">
+                                                    <p className="text-green-400 text-xs mb-1">{t.exits}:</p>
+                                                    {(language === 'it' ? phaseInfo.exitsIT : phaseInfo.exitsEN).map((exit, i) => (
+                                                        <p key={i} className="text-green-300 text-sm">→ {exit}</p>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                    
+                                    {/* Complete phase */}
+                                    {currentPhase === 'complete' && phaseInfo && (
+                                        <div className="bg-green-900/30 rounded-xl p-4">
+                                            <h3 className="text-xl font-bold text-green-400 mb-2">
+                                                🎉 {t.complete}
+                                            </h3>
+                                            <p className="text-gray-300 text-sm">
+                                                {language === 'it' ? phaseInfo.descIT : phaseInfo.descEN}
+                                            </p>
+                                        </div>
+                                    )}
+                                    
+                                    {/* Controls */}
+                                    <div className="flex gap-3">
+                                        {currentPhase !== 'complete' ? (
+                                            <button
+                                                onClick={handleNextPhase}
+                                                className="flex-1 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl font-semibold transition"
+                                            >
+                                                {t.next}
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={handleRestart}
+                                                className="flex-1 py-3 bg-green-600 hover:bg-green-500 rounded-xl font-semibold transition"
+                                            >
+                                                {t.tryAnother}
+                                            </button>
+                                        )}
+                                        
+                                        <button
+                                            onClick={handleRestart}
+                                            className="px-4 py-3 bg-gray-700 hover:bg-gray-600 rounded-xl transition"
+                                        >
+                                            {t.restart}
+                                        </button>
+                                    </div>
+                                    
+                                    {/* Note */}
+                                    <p className="text-xs text-gray-500 italic">
+                                        {t.note}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                        
+                        {/* Footer */}
+                        <div className="mt-8 text-center text-gray-500 text-sm">
+                            {t.credits} <a href="https://ai-know.pro" className="text-blue-400 hover:underline">Paolo Dalprato</a>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        
+        ReactDOM.render(<DigestiveSimulator />, document.getElementById('root'));
+    </script>
+</body>
+</html>

@@ -12,8 +12,9 @@ Make learning more accessible through interactive visualizations that allow you 
 
 | Simulator | Description | Link |
 |-----------|-------------|------|
-| [❤️ Heart](./heart/) | How the human heart works: the cardiac cycle in 7 steps | <a href="https://paolodalprato.github.io/interactive-simulators/heart/heart-simulator.html" target="_blank">Open</a> |
-| [🌌 Gravity](./gravity/) | Explore gravitational attraction and emergent behavior from simple physical rules | <a href="https://paolodalprato.github.io/interactive-simulators/gravity/gravity-simulator.html" target="_blank">Open</a> |
+| ❤️ [Heart](./heart/) | How the human heart works: the cardiac cycle in 7 steps | [Open](https://paolodalprato.github.io/interactive-simulators/heart/heart-simulator.html) |
+| 🌌 [Gravity](./gravity/) | Explore gravitational attraction and emergent behavior from simple physical rules | [Open](https://paolodalprato.github.io/interactive-simulators/gravity/gravity-simulator.html) |
+| 🍽️ [Digestion](./digestion/) | Follow food through the digestive system and see how nutrients are absorbed | [Open](https://paolodalprato.github.io/interactive-simulators/digestion/digestion-simulator.html) |
 
 ## ✨ Common Features
 
