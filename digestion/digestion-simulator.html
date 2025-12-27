@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -44,7 +44,7 @@
         const foods = {
             water: {
                 id: 'water',
-                icon: '💧',
+                icon: '??',
                 nameEN: 'Water',
                 nameIT: 'Acqua',
                 phases: ['mouth', 'esophagus', 'stomach', 'small_intestine', 'complete'],
@@ -55,7 +55,7 @@
             },
             apple: {
                 id: 'apple',
-                icon: '🍎',
+                icon: '??',
                 nameEN: 'Apple',
                 nameIT: 'Mela',
                 phases: ['mouth', 'esophagus', 'stomach', 'small_intestine', 'large_intestine', 'complete'],
@@ -68,7 +68,7 @@
             },
             sandwich: {
                 id: 'sandwich',
-                icon: '🥪',
+                icon: '??',
                 nameEN: 'Sandwich',
                 nameIT: 'Sandwich',
                 phases: ['mouth', 'esophagus', 'stomach', 'small_intestine', 'large_intestine', 'complete'],
@@ -83,7 +83,7 @@
             },
             salad: {
                 id: 'salad',
-                icon: '🥗',
+                icon: '??',
                 nameEN: 'Salad',
                 nameIT: 'Insalata',
                 phases: ['mouth', 'esophagus', 'stomach', 'small_intestine', 'large_intestine', 'complete'],
@@ -96,7 +96,7 @@
             },
             cheese: {
                 id: 'cheese',
-                icon: '🧀',
+                icon: '??',
                 nameEN: 'Cheese',
                 nameIT: 'Formaggio',
                 phases: ['mouth', 'esophagus', 'stomach', 'small_intestine', 'large_intestine', 'complete'],
@@ -109,7 +109,7 @@
             },
             feast: {
                 id: 'feast',
-                icon: '🍽️',
+                icon: '???',
                 nameEN: 'Holiday Feast',
                 nameIT: 'Cenone',
                 phases: ['mouth', 'esophagus', 'stomach', 'small_intestine', 'large_intestine', 'complete'],
@@ -153,15 +153,15 @@
                 },
                 esophagus: {
                     descEN: 'Water flows quickly down the esophagus. Gravity helps, but peristaltic waves ensure it reaches the stomach even when lying down.',
-                    descIT: 'L\'acqua scorre rapidamente lungo l\'esofago. La gravità aiuta, ma le onde peristaltiche assicurano che raggiunga lo stomaco anche da sdraiati.',
+                    descIT: 'L\'acqua scorre rapidamente lungo l\'esofago. La gravit� aiuta, ma le onde peristaltiche assicurano che raggiunga lo stomaco anche da sdraiati.',
                     durationEN: '1-2 seconds',
                     durationIT: '1-2 secondi',
                     actionEN: 'Rapid transit via gravity and peristalsis',
-                    actionIT: 'Transito rapido per gravità e peristalsi'
+                    actionIT: 'Transito rapido per gravit� e peristalsi'
                 },
                 stomach: {
                     descEN: 'Water mostly bypasses the stomach. It passes through quickly, especially on an empty stomach, heading directly to the intestines.',
-                    descIT: 'L\'acqua bypassa per lo più lo stomaco. Passa rapidamente, specialmente a stomaco vuoto, dirigendosi direttamente verso l\'intestino.',
+                    descIT: 'L\'acqua bypassa per lo pi� lo stomaco. Passa rapidamente, specialmente a stomaco vuoto, dirigendosi direttamente verso l\'intestino.',
                     durationEN: '5-15 minutes',
                     durationIT: '5-15 minuti',
                     actionEN: 'Minimal retention, quick passage',
@@ -169,23 +169,23 @@
                 },
                 small_intestine: {
                     descEN: 'This is where water is absorbed. It passes through the intestinal wall into the bloodstream, hydrating your body within minutes.',
-                    descIT: 'È qui che l\'acqua viene assorbita. Passa attraverso la parete intestinale nel flusso sanguigno, idratando il corpo in pochi minuti.',
+                    descIT: '� qui che l\'acqua viene assorbita. Passa attraverso la parete intestinale nel flusso sanguigno, idratando il corpo in pochi minuti.',
                     durationEN: '5-10 minutes',
                     durationIT: '5-10 minuti',
                     actionEN: 'Rapid absorption into bloodstream',
                     actionIT: 'Assorbimento rapido nel flusso sanguigno',
-                    exitsEN: ['Water → Blood → Entire body'],
-                    exitsIT: ['Acqua → Sangue → Tutto il corpo']
+                    exitsEN: ['Water ? Blood ? Entire body'],
+                    exitsIT: ['Acqua ? Sangue ? Tutto il corpo']
                 },
                 complete: {
                     descEN: 'Water digestion is complete. Most water is now circulating in your blood, ready to hydrate cells throughout your body.',
-                    descIT: 'La digestione dell\'acqua è completata. La maggior parte dell\'acqua ora circola nel sangue, pronta a idratare le cellule di tutto il corpo.'
+                    descIT: 'La digestione dell\'acqua � completata. La maggior parte dell\'acqua ora circola nel sangue, pronta a idratare le cellule di tutto il corpo.'
                 }
             },
             apple: {
                 mouth: {
                     descEN: 'Teeth crush the apple into smaller pieces. Saliva contains amylase, which begins breaking down the apple\'s starches into simpler sugars. The fiber remains intact.',
-                    descIT: 'I denti frantumano la mela in pezzi più piccoli. La saliva contiene amilasi, che inizia a trasformare gli amidi della mela in zuccheri semplici. Le fibre restano intatte.',
+                    descIT: 'I denti frantumano la mela in pezzi pi� piccoli. La saliva contiene amilasi, che inizia a trasformare gli amidi della mela in zuccheri semplici. Le fibre restano intatte.',
                     actionEN: 'Chewing + starch breakdown begins',
                     actionIT: 'Masticazione + inizia scomposizione amidi'
                 },
@@ -199,7 +199,7 @@
                 },
                 stomach: {
                     descEN: 'Gastric acids and enzymes continue breaking down the apple. Natural sugars are already simple, but proteins (minimal in apple) are processed here. Fiber passes through unchanged.',
-                    descIT: 'Acidi gastrici ed enzimi continuano a scomporre la mela. Gli zuccheri naturali sono già semplici, ma le proteine (minime nella mela) vengono elaborate qui. Le fibre passano inalterate.',
+                    descIT: 'Acidi gastrici ed enzimi continuano a scomporre la mela. Gli zuccheri naturali sono gi� semplici, ma le proteine (minime nella mela) vengono elaborate qui. Le fibre passano inalterate.',
                     durationEN: '1-2 hours',
                     durationIT: '1-2 ore',
                     actionEN: 'Acidic breakdown, fiber unchanged',
@@ -212,22 +212,22 @@
                     durationIT: '2-3 ore',
                     actionEN: 'Sugar and water absorption',
                     actionIT: 'Assorbimento zuccheri e acqua',
-                    exitsEN: ['Sugars → Blood → Liver', 'Water → Blood'],
-                    exitsIT: ['Zuccheri → Sangue → Fegato', 'Acqua → Sangue']
+                    exitsEN: ['Sugars ? Blood ? Liver', 'Water ? Blood'],
+                    exitsIT: ['Zuccheri ? Sangue ? Fegato', 'Acqua ? Sangue']
                 },
                 large_intestine: {
                     descEN: 'Fiber arrives here mostly intact. Gut bacteria ferment it, producing short-chain fatty acids that nourish colon cells. Remaining water is reabsorbed.',
-                    descIT: 'Le fibre arrivano qui perlopiù intatte. I batteri intestinali le fermentano, producendo acidi grassi a catena corta che nutrono le cellule del colon. L\'acqua residua viene riassorbita.',
+                    descIT: 'Le fibre arrivano qui perlopi� intatte. I batteri intestinali le fermentano, producendo acidi grassi a catena corta che nutrono le cellule del colon. L\'acqua residua viene riassorbita.',
                     durationEN: '12-24 hours',
                     durationIT: '12-24 ore',
                     actionEN: 'Bacterial fermentation of fiber',
                     actionIT: 'Fermentazione batterica delle fibre',
-                    exitsEN: ['Water → Blood', 'Short-chain fatty acids → Colon cells'],
-                    exitsIT: ['Acqua → Sangue', 'Acidi grassi a catena corta → Cellule del colon']
+                    exitsEN: ['Water ? Blood', 'Short-chain fatty acids ? Colon cells'],
+                    exitsIT: ['Acqua ? Sangue', 'Acidi grassi a catena corta ? Cellule del colon']
                 },
                 complete: {
                     descEN: 'Apple digestion complete. Sugars were used for energy, water hydrated your body, and fiber fed your gut bacteria before being eliminated.',
-                    descIT: 'La digestione della mela è completata. Gli zuccheri sono stati usati per energia, l\'acqua ha idratato il corpo, e le fibre hanno nutrito i batteri intestinali prima di essere eliminate.'
+                    descIT: 'La digestione della mela � completata. Gli zuccheri sono stati usati per energia, l\'acqua ha idratato il corpo, e le fibre hanno nutrito i batteri intestinali prima di essere eliminate.'
                 }
             },
             sandwich: {
@@ -247,7 +247,7 @@
                 },
                 stomach: {
                     descEN: 'Proteins from meat/cheese are broken down by pepsin in the acidic environment. Fats slow gastric emptying significantly. Salivary amylase continues starch breakdown until stomach acid deactivates it. This is a busy phase!',
-                    descIT: 'Le proteine di carne/formaggio vengono scomposte dalla pepsina nell\'ambiente acido. I grassi rallentano molto lo svuotamento gastrico. L\'amilasi salivare continua la scomposizione dell\'amido finché l\'acido gastrico non la disattiva. Questa è una fase intensa!',
+                    descIT: 'Le proteine di carne/formaggio vengono scomposte dalla pepsina nell\'ambiente acido. I grassi rallentano molto lo svuotamento gastrico. L\'amilasi salivare continua la scomposizione dell\'amido finch� l\'acido gastrico non la disattiva. Questa � una fase intensa!',
                     durationEN: '3-4 hours',
                     durationIT: '3-4 ore',
                     actionEN: 'Protein digestion, fats slow everything',
@@ -255,23 +255,23 @@
                 },
                 small_intestine: {
                     descEN: 'Maximum activity here. Pancreatic enzymes complete protein and carb digestion. Bile from the liver emulsifies fats for absorption. Nutrients enter blood (carbs, proteins) or lymphatic system (fats).',
-                    descIT: 'Massima attività qui. Enzimi pancreatici completano la digestione di proteine e carboidrati. La bile dal fegato emulsiona i grassi per l\'assorbimento. I nutrienti entrano nel sangue (carboidrati, proteine) o nel sistema linfatico (grassi).',
+                    descIT: 'Massima attivit� qui. Enzimi pancreatici completano la digestione di proteine e carboidrati. La bile dal fegato emulsiona i grassi per l\'assorbimento. I nutrienti entrano nel sangue (carboidrati, proteine) o nel sistema linfatico (grassi).',
                     durationEN: '3-5 hours',
                     durationIT: '3-5 ore',
                     actionEN: 'Complete breakdown and absorption',
                     actionIT: 'Scomposizione completa e assorbimento',
-                    exitsEN: ['Sugars + Amino acids → Blood → Liver', 'Fats → Lymphatic system → Blood'],
-                    exitsIT: ['Zuccheri + Aminoacidi → Sangue → Fegato', 'Grassi → Sistema linfatico → Sangue']
+                    exitsEN: ['Sugars + Amino acids ? Blood ? Liver', 'Fats ? Lymphatic system ? Blood'],
+                    exitsIT: ['Zuccheri + Aminoacidi ? Sangue ? Fegato', 'Grassi ? Sistema linfatico ? Sangue']
                 },
                 large_intestine: {
                     descEN: 'Fiber from bread and vegetables arrives here mostly intact. Water is reabsorbed into the bloodstream. Gut bacteria ferment the fiber, producing short-chain fatty acids. The material moves as a mass and is gradually compacted for elimination.',
-                    descIT: 'Le fibre da pane e verdure arrivano qui perlopiù intatte. L\'acqua viene riassorbita nel sangue. I batteri intestinali fermentano le fibre, producendo acidi grassi a catena corta. Il materiale si muove come massa e viene gradualmente compattato per l\'eliminazione.',
+                    descIT: 'Le fibre da pane e verdure arrivano qui perlopi� intatte. L\'acqua viene riassorbita nel sangue. I batteri intestinali fermentano le fibre, producendo acidi grassi a catena corta. Il materiale si muove come massa e viene gradualmente compattato per l\'eliminazione.',
                     durationEN: '12-36 hours',
                     durationIT: '12-36 ore',
                     actionEN: 'Water recovery, bacterial fermentation',
                     actionIT: 'Recupero acqua, fermentazione batterica',
-                    exitsEN: ['Water → Blood'],
-                    exitsIT: ['Acqua → Sangue']
+                    exitsEN: ['Water ? Blood'],
+                    exitsIT: ['Acqua ? Sangue']
                 },
                 complete: {
                     descEN: 'Sandwich digestion complete. Carbs provided quick energy, proteins supplied amino acids for muscles, and fats provided sustained energy and nutrient absorption.',
@@ -281,7 +281,7 @@
             salad: {
                 mouth: {
                     descEN: 'Extensive chewing is needed to break down fibrous leaves. Little chemical digestion occurs since salad is mostly water and fiber with minimal starch.',
-                    descIT: 'È necessaria una masticazione prolungata per scomporre le foglie fibrose. Poca digestione chimica avviene poiché l\'insalata è principalmente acqua e fibre con amido minimo.',
+                    descIT: '� necessaria una masticazione prolungata per scomporre le foglie fibrose. Poca digestione chimica avviene poich� l\'insalata � principalmente acqua e fibre con amido minimo.',
                     actionEN: 'Extensive chewing of fibrous material',
                     actionIT: 'Masticazione prolungata di materiale fibroso'
                 },
@@ -295,7 +295,7 @@
                 },
                 stomach: {
                     descEN: 'Relatively quick transit since there\'s little protein or fat to process. The stomach mainly mixes the material with gastric juices. Fiber is unaffected by stomach acid.',
-                    descIT: 'Transito relativamente veloce poiché ci sono poche proteine o grassi da elaborare. Lo stomaco principalmente mescola il materiale con i succhi gastrici. Le fibre non sono intaccate dall\'acido.',
+                    descIT: 'Transito relativamente veloce poich� ci sono poche proteine o grassi da elaborare. Lo stomaco principalmente mescola il materiale con i succhi gastrici. Le fibre non sono intaccate dall\'acido.',
                     durationEN: '1-2 hours',
                     durationIT: '1-2 ore',
                     actionEN: 'Minimal processing, fiber passes through',
@@ -303,39 +303,39 @@
                 },
                 small_intestine: {
                     descEN: 'Water and the few available nutrients (vitamins, minerals, small amounts of sugars) are absorbed. Most fiber passes through undigested, but it slows transit and helps you feel full longer.',
-                    descIT: 'L\'acqua e i pochi nutrienti disponibili (vitamine, minerali, piccole quantità di zuccheri) vengono assorbiti. La maggior parte delle fibre passa indigerita, ma rallenta il transito e aiuta a sentirsi sazi più a lungo.',
+                    descIT: 'L\'acqua e i pochi nutrienti disponibili (vitamine, minerali, piccole quantit� di zuccheri) vengono assorbiti. La maggior parte delle fibre passa indigerita, ma rallenta il transito e aiuta a sentirsi sazi pi� a lungo.',
                     durationEN: '2-3 hours',
                     durationIT: '2-3 ore',
                     actionEN: 'Water and micronutrient absorption',
                     actionIT: 'Assorbimento acqua e micronutrienti',
-                    exitsEN: ['Water + Vitamins → Blood'],
-                    exitsIT: ['Acqua + Vitamine → Sangue']
+                    exitsEN: ['Water + Vitamins ? Blood'],
+                    exitsIT: ['Acqua + Vitamine ? Sangue']
                 },
                 large_intestine: {
                     descEN: 'This is where salad has its real impact. The abundant fiber feeds gut bacteria, promoting a healthy microbiome. Bacteria produce beneficial fatty acids. The bulk helps with regular bowel movements.',
-                    descIT: 'È qui che l\'insalata ha il suo vero impatto. Le abbondanti fibre nutrono i batteri intestinali, promuovendo un microbioma sano. I batteri producono acidi grassi benefici. Il volume aiuta la regolarità intestinale.',
+                    descIT: '� qui che l\'insalata ha il suo vero impatto. Le abbondanti fibre nutrono i batteri intestinali, promuovendo un microbioma sano. I batteri producono acidi grassi benefici. Il volume aiuta la regolarit� intestinale.',
                     durationEN: '18-36 hours',
                     durationIT: '18-36 ore',
                     actionEN: 'Fiber fermentation, promotes gut health',
                     actionIT: 'Fermentazione fibre, promuove salute intestinale',
-                    exitsEN: ['Water → Blood', 'Short-chain fatty acids → Colon cells'],
-                    exitsIT: ['Acqua → Sangue', 'Acidi grassi a catena corta → Cellule del colon']
+                    exitsEN: ['Water ? Blood', 'Short-chain fatty acids ? Colon cells'],
+                    exitsIT: ['Acqua ? Sangue', 'Acidi grassi a catena corta ? Cellule del colon']
                 },
                 complete: {
                     descEN: 'Salad digestion complete. Despite low calories, salad provided hydration, vitamins, and crucial fiber that supports gut health and regular digestion.',
-                    descIT: 'Digestione dell\'insalata completata. Nonostante le poche calorie, l\'insalata ha fornito idratazione, vitamine e fibre cruciali che supportano la salute intestinale e la regolarità.'
+                    descIT: 'Digestione dell\'insalata completata. Nonostante le poche calorie, l\'insalata ha fornito idratazione, vitamine e fibre cruciali che supportano la salute intestinale e la regolarit�.'
                 }
             },
             cheese: {
                 mouth: {
                     descEN: 'In the mouth, cheese is chewed. The high fat content would require more prolonged chewing. No significant chemical digestion occurs here.',
-                    descIT: 'In bocca il formaggio viene masticato. L\'alto contenuto di grassi richiederebbe una masticazione più prolungata. Non avviene nessuna digestione chimica significativa qui.',
+                    descIT: 'In bocca il formaggio viene masticato. L\'alto contenuto di grassi richiederebbe una masticazione pi� prolungata. Non avviene nessuna digestione chimica significativa qui.',
                     actionEN: 'Mechanical breakdown of fatty food',
                     actionIT: 'Frammentazione meccanica di cibo grasso'
                 },
                 esophagus: {
                     descEN: 'The chewed cheese passes down easily when well-masticated. Its compact nature means the bolus is denser than other foods.',
-                    descIT: 'Il formaggio masticato scende facilmente se ben sminuzzato. La sua natura compatta rende il bolo più denso rispetto ad altri cibi.',
+                    descIT: 'Il formaggio masticato scende facilmente se ben sminuzzato. La sua natura compatta rende il bolo pi� denso rispetto ad altri cibi.',
                     durationEN: '5-8 seconds',
                     durationIT: '5-8 secondi',
                     actionEN: 'Dense bolus transport',
@@ -343,7 +343,7 @@
                 },
                 stomach: {
                     descEN: 'This is where cheese digestion really slows down. The high fat content significantly delays gastric emptying. Pepsin starts breaking down casein and other milk proteins in the acidic environment. You may feel full for a long time.',
-                    descIT: 'È qui che la digestione del formaggio rallenta davvero. L\'alto contenuto di grassi ritarda significativamente lo svuotamento gastrico. La pepsina inizia a scomporre la caseina e altre proteine del latte nell\'ambiente acido. Potresti sentirti sazio a lungo.',
+                    descIT: '� qui che la digestione del formaggio rallenta davvero. L\'alto contenuto di grassi ritarda significativamente lo svuotamento gastrico. La pepsina inizia a scomporre la caseina e altre proteine del latte nell\'ambiente acido. Potresti sentirti sazio a lungo.',
                     durationEN: '3-5 hours',
                     durationIT: '3-5 ore',
                     actionEN: 'Slow emptying due to high fat',
@@ -351,23 +351,23 @@
                 },
                 small_intestine: {
                     descEN: 'Bile from the liver is essential here to emulsify the abundant fats. Pancreatic lipase then breaks them into absorbable fatty acids. Proteins are fully digested into amino acids. Fats enter the lymphatic system, while amino acids go directly to the blood.',
-                    descIT: 'La bile dal fegato è essenziale qui per emulsionare i grassi abbondanti. La lipasi pancreatica li scompone poi in acidi grassi assorbibili. Le proteine vengono completamente digerite in aminoacidi. I grassi entrano nel sistema linfatico, mentre gli aminoacidi vanno direttamente nel sangue.',
+                    descIT: 'La bile dal fegato � essenziale qui per emulsionare i grassi abbondanti. La lipasi pancreatica li scompone poi in acidi grassi assorbibili. Le proteine vengono completamente digerite in aminoacidi. I grassi entrano nel sistema linfatico, mentre gli aminoacidi vanno direttamente nel sangue.',
                     durationEN: '3-5 hours',
                     durationIT: '3-5 ore',
                     actionEN: 'Intensive fat processing',
                     actionIT: 'Elaborazione intensiva dei grassi',
-                    exitsEN: ['Amino acids → Blood → Liver', 'Fats → Lymphatic system → Blood'],
-                    exitsIT: ['Aminoacidi → Sangue → Fegato', 'Grassi → Sistema linfatico → Sangue']
+                    exitsEN: ['Amino acids ? Blood ? Liver', 'Fats ? Lymphatic system ? Blood'],
+                    exitsIT: ['Aminoacidi ? Sangue ? Fegato', 'Grassi ? Sistema linfatico ? Sangue']
                 },
                 large_intestine: {
                     descEN: 'Very little reaches here from cheese - most nutrients have been absorbed. Any remaining undigested proteins or fats are processed by gut bacteria. Water is reabsorbed. Cheese typically produces minimal fecal residue.',
-                    descIT: 'Dal formaggio arriva molto poco qui - la maggior parte dei nutrienti è stata assorbita. Eventuali proteine o grassi non digeriti vengono elaborati dai batteri intestinali. L\'acqua viene riassorbita. Il formaggio produce tipicamente residui fecali minimi.',
+                    descIT: 'Dal formaggio arriva molto poco qui - la maggior parte dei nutrienti � stata assorbita. Eventuali proteine o grassi non digeriti vengono elaborati dai batteri intestinali. L\'acqua viene riassorbita. Il formaggio produce tipicamente residui fecali minimi.',
                     durationEN: '12-24 hours',
                     durationIT: '12-24 ore',
                     actionEN: 'Minimal residue processing',
                     actionIT: 'Elaborazione di residui minimi',
-                    exitsEN: ['Water → Blood'],
-                    exitsIT: ['Acqua → Sangue']
+                    exitsEN: ['Water ? Blood'],
+                    exitsIT: ['Acqua ? Sangue']
                 },
                 complete: {
                     descEN: 'Cheese digestion complete. The high fat and protein content provided sustained energy and essential amino acids, but required significant digestive effort and time.',
@@ -377,7 +377,7 @@
             feast: {
                 mouth: {
                     descEN: 'A holiday feast means many textures and types of food. Extended chewing time is needed. Salivary amylase works on starches from bread, potatoes, and desserts.',
-                    descIT: 'Un cenone significa molte texture e tipi di cibo. È necessario un tempo di masticazione prolungato. L\'amilasi salivare lavora sugli amidi di pane, patate e dolci.',
+                    descIT: 'Un cenone significa molte texture e tipi di cibo. � necessario un tempo di masticazione prolungato. L\'amilasi salivare lavora sugli amidi di pane, patate e dolci.',
                     actionEN: 'Extended chewing for complex meal',
                     actionIT: 'Masticazione prolungata per pasto complesso'
                 },
@@ -391,7 +391,7 @@
                 },
                 stomach: {
                     descEN: 'The stomach is working at maximum capacity. High fat content (butter, oil, fatty meats) dramatically slows emptying. Proteins require extensive processing. You may feel "stuffed" for hours.',
-                    descIT: 'Lo stomaco lavora a pieno regime. L\'alto contenuto di grassi (burro, olio, carni grasse) rallenta drasticamente lo svuotamento. Le proteine richiedono elaborazione estesa. Potresti sentirti «pieno» per ore.',
+                    descIT: 'Lo stomaco lavora a pieno regime. L\'alto contenuto di grassi (burro, olio, carni grasse) rallenta drasticamente lo svuotamento. Le proteine richiedono elaborazione estesa. Potresti sentirti �pieno� per ore.',
                     durationEN: '4-6 hours',
                     durationIT: '4-6 ore',
                     actionEN: 'Overloaded! Fats slow everything significantly',
@@ -399,27 +399,27 @@
                 },
                 small_intestine: {
                     descEN: 'All systems at full capacity. Massive amounts of nutrients being absorbed: sugars from desserts, amino acids from meats, fats requiring extra bile. The liver and pancreas work overtime.',
-                    descIT: 'Tutti i sistemi a pieno regime. Enormi quantità di nutrienti da assorbire: zuccheri dai dolci, aminoacidi dalle carni, grassi che richiedono bile extra. Fegato e pancreas lavorano senza sosta.',
+                    descIT: 'Tutti i sistemi a pieno regime. Enormi quantit� di nutrienti da assorbire: zuccheri dai dolci, aminoacidi dalle carni, grassi che richiedono bile extra. Fegato e pancreas lavorano senza sosta.',
                     durationEN: '5-8 hours',
                     durationIT: '5-8 ore',
                     actionEN: 'Maximum absorption activity',
-                    actionIT: 'Massima attività di assorbimento',
-                    exitsEN: ['Sugars + Amino acids → Blood → Liver (working hard!)', 'Fats → Lymphatic system → Blood', 'Excess may be stored as fat'],
-                    exitsIT: ['Zuccheri + Aminoacidi → Sangue → Fegato (lavora duro!)', 'Grassi → Sistema linfatico → Sangue', 'L\'eccesso può essere immagazzinato come grasso']
+                    actionIT: 'Massima attivit� di assorbimento',
+                    exitsEN: ['Sugars + Amino acids ? Blood ? Liver (working hard!)', 'Fats ? Lymphatic system ? Blood', 'Excess may be stored as fat'],
+                    exitsIT: ['Zuccheri + Aminoacidi ? Sangue ? Fegato (lavora duro!)', 'Grassi ? Sistema linfatico ? Sangue', 'L\'eccesso pu� essere immagazzinato come grasso']
                 },
                 large_intestine: {
                     descEN: 'After the feast, a significant mass of material arrives here. Water reabsorption is crucial. Gut bacteria work on the remaining fiber. The large volume means longer transit time as the material moves through as a mass, contributing to the prolonged feeling of fullness.',
-                    descIT: 'Dopo il cenone, una massa significativa di materiale arriva qui. Il riassorbimento dell\'acqua è cruciale. I batteri intestinali lavorano sulle fibre residue. Il grande volume significa un tempo di transito più lungo mentre il materiale si muove come massa, contribuendo alla prolungata sensazione di pienezza.',
+                    descIT: 'Dopo il cenone, una massa significativa di materiale arriva qui. Il riassorbimento dell\'acqua � cruciale. I batteri intestinali lavorano sulle fibre residue. Il grande volume significa un tempo di transito pi� lungo mentre il materiale si muove come massa, contribuendo alla prolungata sensazione di pienezza.',
                     durationEN: '24-48 hours',
                     durationIT: '24-48 ore',
                     actionEN: 'Extended processing of large volume',
                     actionIT: 'Elaborazione prolungata di grande volume',
-                    exitsEN: ['Water → Blood'],
-                    exitsIT: ['Acqua → Sangue']
+                    exitsEN: ['Water ? Blood'],
+                    exitsIT: ['Acqua ? Sangue']
                 },
                 complete: {
                     descEN: 'Feast digestion finally complete! Your body processed enormous amounts of carbs, proteins, and fats. Excess calories have been stored. This is why post-holiday walks help!',
-                    descIT: 'Digestione del cenone finalmente completata! Il tuo corpo ha elaborato enormi quantità di carboidrati, proteine e grassi. Le calorie in eccesso sono state immagazzinate. Ecco perché le passeggiate post-feste aiutano!'
+                    descIT: 'Digestione del cenone finalmente completata! Il tuo corpo ha elaborato enormi quantit� di carboidrati, proteine e grassi. Le calorie in eccesso sono state immagazzinate. Ecco perch� le passeggiate post-feste aiutano!'
                 }
             }
         };
@@ -431,7 +431,7 @@
                 selectFood: 'Select food',
                 phase: 'Phase',
                 of: 'of',
-                next: 'Next Phase →',
+                next: 'Next Phase ?',
                 restart: 'Restart',
                 legend: 'Legend',
                 currentPhase: 'Current phase',
@@ -450,7 +450,7 @@
                 selectFood: 'Seleziona cibo',
                 phase: 'Fase',
                 of: 'di',
-                next: 'Fase successiva →',
+                next: 'Fase successiva ?',
                 restart: 'Ricomincia',
                 legend: 'Legenda',
                 currentPhase: 'Fase attuale',
@@ -461,7 +461,7 @@
                 complete: 'Digestione completata!',
                 tryAnother: 'Prova un altro cibo',
                 credits: 'Creato da',
-                note: 'Nota: Questo è un modello educativo semplificato. I tempi reali di digestione variano in base a fattori individuali e combinazioni di cibi.'
+                note: 'Nota: Questo � un modello educativo semplificato. I tempi reali di digestione variano in base a fattori individuali e combinazioni di cibi.'
             }
         };
         
@@ -551,7 +551,7 @@
                         </text>
                     </g>
                     
-                    {/* Connection mouth to esophagus (90° curve) */}
+                    {/* Connection mouth to esophagus (90� curve) */}
                     <path
                         d="M200 50 Q240 50 240 90 L240 120"
                         fill="none"
@@ -658,7 +658,7 @@
                             <g className="exit-arrow">
                                 {/* Blood arrow - always visible */}
                                 <text x="340" y="478" fill="#22C55E" fontSize="9" textAnchor="middle">
-                                    {language === 'it' ? 'Sangue → Fegato' : 'Blood → Liver'}
+                                    {language === 'it' ? 'Sangue ? Fegato' : 'Blood ? Liver'}
                                 </text>
                                 <path d="M320 490 L370 490" stroke="#22C55E" strokeWidth="2" markerEnd="url(#arrowGreen)" />
                                 
@@ -736,7 +736,7 @@
                                     {language === 'it' ? 'Acqua' : 'Water'}
                                 </text>
                                 <text x="390" y="685" fill="#3B82F6" fontSize="9">
-                                    → {language === 'it' ? 'Sangue' : 'Blood'}
+                                    ? {language === 'it' ? 'Sangue' : 'Blood'}
                                 </text>
                             </g>
                         )}
@@ -958,7 +958,7 @@
                                 onClick={() => setLanguage(language === 'en' ? 'it' : 'en')}
                                 className="px-3 py-1 bg-gray-700 rounded-lg text-sm hover:bg-gray-600 transition"
                             >
-                                {language === 'en' ? '🇮🇹 Italiano' : '🇬🇧 English'}
+                                {language === 'en' ? '???? Italiano' : '???? English'}
                             </button>
                         </div>
                         
@@ -1070,7 +1070,7 @@
                                                 <div className="bg-green-900/30 rounded-lg p-3">
                                                     <p className="text-green-400 text-xs mb-1">{t.exits}:</p>
                                                     {(language === 'it' ? phaseInfo.exitsIT : phaseInfo.exitsEN).map((exit, i) => (
-                                                        <p key={i} className="text-green-300 text-sm">→ {exit}</p>
+                                                        <p key={i} className="text-green-300 text-sm">? {exit}</p>
                                                     ))}
                                                 </div>
                                             )}
@@ -1081,7 +1081,7 @@
                                     {currentPhase === 'complete' && phaseInfo && (
                                         <div className="bg-green-900/30 rounded-xl p-4">
                                             <h3 className="text-xl font-bold text-green-400 mb-2">
-                                                🎉 {t.complete}
+                                                ?? {t.complete}
                                             </h3>
                                             <p className="text-gray-300 text-sm">
                                                 {language === 'it' ? phaseInfo.descIT : phaseInfo.descEN}
@@ -1135,4 +1135,4 @@
         ReactDOM.render(<DigestiveSimulator />, document.getElementById('root'));
     </script>
 </body>
-</html>
+</html>`n
