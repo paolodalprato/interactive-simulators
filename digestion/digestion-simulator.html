@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -30,6 +30,16 @@
         // ============================================
         // DATA
         // ============================================
+        
+        // Absorption probability thresholds (educational approximations)
+        // These values are simplified for visualization purposes:
+        // - In reality, absorption rates vary by individual, food combinations, and gut health
+        // - Water absorption is shown at ~50% in small intestine (rest in large intestine)
+        // - Other nutrients shown at ~70% to visualize that most absorption happens here
+        const ABSORPTION_RATES = {
+            WATER_IN_SMALL_INTESTINE: 0.5,    // 50% of water absorbed here, rest in large intestine
+            NUTRIENTS_IN_SMALL_INTESTINE: 0.7  // 70% of carbs/protein/fat absorbed
+        };
         
         const foods = {
             water: {
@@ -114,12 +124,13 @@
             }
         };
         
+        // Nutrient types with visual properties
         const pelletTypes = {
-            water: { color: '#3B82F6', nameEN: 'Water', nameIT: 'Acqua', speed: 1.5 },
-            carbs: { color: '#EAB308', nameEN: 'Carbohydrates', nameIT: 'Carboidrati', speed: 1.0 },
-            protein: { color: '#EF4444', nameEN: 'Proteins', nameIT: 'Proteine', speed: 0.7 },
-            fat: { color: '#F97316', nameEN: 'Fats', nameIT: 'Grassi', speed: 0.4 },
-            fiber: { color: '#22C55E', nameEN: 'Fiber', nameIT: 'Fibre', speed: 0.3 }
+            water: { color: '#3B82F6', nameEN: 'Water', nameIT: 'Acqua' },
+            carbs: { color: '#EAB308', nameEN: 'Carbohydrates', nameIT: 'Carboidrati' },
+            protein: { color: '#EF4444', nameEN: 'Proteins', nameIT: 'Proteine' },
+            fat: { color: '#F97316', nameEN: 'Fats', nameIT: 'Grassi' },
+            fiber: { color: '#22C55E', nameEN: 'Fiber', nameIT: 'Fibre' }
         };
         
         const phases = {
@@ -137,8 +148,6 @@
                 mouth: {
                     descEN: 'Water requires no chewing. It simply passes through the mouth, briefly mixing with saliva.',
                     descIT: 'L\'acqua non richiede masticazione. Passa semplicemente attraverso la bocca, mescolandosi brevemente con la saliva.',
-                    durationEN: '1-2 seconds',
-                    durationIT: '1-2 secondi',
                     actionEN: 'Swallowing reflex triggered',
                     actionIT: 'Attivazione del riflesso di deglutizione'
                 },
@@ -647,15 +656,21 @@
                         {/* Exit arrows for small intestine - positioned to the right */}
                         {isCurrent('small_intestine') && (
                             <g className="exit-arrow">
-                                <path d="M320 490 L370 490" stroke="#22C55E" strokeWidth="2" markerEnd="url(#arrowGreen)" />
-                                <text x="375" y="485" fill="#22C55E" fontSize="9">
+                                {/* Blood arrow - always visible */}
+                                <text x="340" y="478" fill="#22C55E" fontSize="9" textAnchor="middle">
                                     {language === 'it' ? 'Sangue → Fegato' : 'Blood → Liver'}
                                 </text>
+                                <path d="M320 490 L370 490" stroke="#22C55E" strokeWidth="2" markerEnd="url(#arrowGreen)" />
                                 
-                                <path d="M320 530 L370 530" stroke="#F97316" strokeWidth="2" markerEnd="url(#arrowOrange)" />
-                                <text x="375" y="535" fill="#F97316" fontSize="9">
-                                    {language === 'it' ? 'Sist. linfatico (grassi)' : 'Lymphatic sys. (fats)'}
-                                </text>
+                                {/* Lymphatic arrow - only visible when food contains fats */}
+                                {food && food.pellets.some(p => p.type === 'fat') && (
+                                    <g>
+                                        <path d="M320 530 L370 530" stroke="#F97316" strokeWidth="2" markerEnd="url(#arrowOrange)" />
+                                        <text x="355" y="548" fill="#F97316" fontSize="9" textAnchor="middle">
+                                            {language === 'it' ? 'Sist. linfatico (grassi)' : 'Lymphatic sys. (fats)'}
+                                        </text>
+                                    </g>
+                                )}
                             </g>
                         )}
                     </g>
@@ -804,13 +819,16 @@
             
             // Move pellets to phase position
             const movePelletsToPhase = (phase, currentPellets) => {
+                // IMPORTANT: These coordinates must stay synchronized with the SVG
+                // organ positions in DigestiveTract component (lines ~510-730).
+                // If you move an organ in the SVG, update the corresponding position here.
                 const positions = {
-                    mouth: { x: 145, y: 50, spread: 25 },
-                    esophagus: { x: 240, y: 180, spread: 6 },
-                    stomach: { x: 240, y: 300, spread: 35 },
-                    small_intestine: { x: 240, y: 490, spread: 30 },
-                    large_intestine: { x: 220, y: 700, spread: 30 },
-                    complete: { x: 370, y: 660, spread: 8 }
+                    mouth: { x: 145, y: 50, spread: 25 },        // SVG: path d="M100..." 
+                    esophagus: { x: 240, y: 180, spread: 6 },    // SVG: rect x="230" y="120"
+                    stomach: { x: 240, y: 300, spread: 35 },     // SVG: ellipse cx="240" cy="300"
+                    small_intestine: { x: 240, y: 490, spread: 30 }, // SVG: path center ~240,490
+                    large_intestine: { x: 220, y: 700, spread: 30 }, // SVG: path at y=700
+                    complete: { x: 370, y: 660, spread: 8 }      // SVG: exit rect x="360" y="625"
                 };
                 
                 const pos = positions[phase];
@@ -857,12 +875,12 @@
                         if (foodId === 'water' && pellet.type === 'water') {
                             return { ...pellet, absorbed: true, exitDirection: 'right' };
                         }
-                        // Water in other foods: only partial absorption here (about 50%)
-                        if (pellet.type === 'water' && Math.random() > 0.5) {
+                        // Water in other foods: partial absorption here, rest in large intestine
+                        if (pellet.type === 'water' && Math.random() < ABSORPTION_RATES.WATER_IN_SMALL_INTESTINE) {
                             return { ...pellet, absorbed: true, exitDirection: 'right' };
                         }
-                        // Carbs, proteins, fats absorbed with high probability
-                        if (['carbs', 'protein', 'fat'].includes(pellet.type) && Math.random() > 0.3) {
+                        // Carbs, proteins, fats: most absorption happens here
+                        if (['carbs', 'protein', 'fat'].includes(pellet.type) && Math.random() < ABSORPTION_RATES.NUTRIENTS_IN_SMALL_INTESTINE) {
                             return { ...pellet, absorbed: true, exitDirection: 'right' };
                         }
                         return pellet;

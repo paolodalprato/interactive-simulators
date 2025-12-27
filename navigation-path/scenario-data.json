@@ -1,0 +1,195 @@
+{
+    "meta": {
+        "title": {
+            "en": "Choose Your Path",
+            "it": "Scegli il tuo percorso"
+        },
+        "description": {
+            "en": "An interactive exploration of different paths",
+            "it": "Un'esplorazione interattiva di percorsi diversi"
+        },
+        "author": "Paolo Dalprato"
+    },
+    "startNode": "start",
+    "nodes": {
+        "start": {
+            "content": {
+                "en": "# Welcome to the Journey\n\nThis is an **interactive exploration** where your choices shape the path ahead.\n\nThere are no right or wrong answers, only different perspectives to discover.\n\n> Each choice opens new possibilities. You can always return to explore other paths.\n\n**Choose your starting direction:**",
+                "it": "# Benvenuto nel viaggio\n\nQuesta è un'**esplorazione interattiva** dove le tue scelte determinano il percorso.\n\nNon esistono risposte giuste o sbagliate, solo prospettive diverse da scoprire.\n\n> Ogni scelta apre nuove possibilità. Puoi sempre tornare per esplorare altri percorsi.\n\n**Scegli la tua direzione iniziale:**"
+            },
+            "choices": [
+                {
+                    "text": {
+                        "en": "Path of Knowledge",
+                        "it": "Via della conoscenza"
+                    },
+                    "next": "knowledge"
+                },
+                {
+                    "text": {
+                        "en": "Path of Action",
+                        "it": "Via dell'azione"
+                    },
+                    "next": "action"
+                },
+                {
+                    "text": {
+                        "en": "Path of Reflection",
+                        "it": "Via della riflessione"
+                    },
+                    "next": "reflection"
+                }
+            ],
+            "resources": [
+                {
+                    "type": "link",
+                    "label": {
+                        "en": "About this project",
+                        "it": "Informazioni sul progetto"
+                    },
+                    "url": "https://ai-know.pro"
+                }
+            ]
+        },
+        "knowledge": {
+            "content": {
+                "en": "# The Path of Knowledge\n\nYou've chosen to explore through **understanding and learning**.\n\nKnowledge builds upon itself, layer by layer:\n\n- First comes curiosity\n- Then investigation\n- Finally, comprehension\n\n> \"The more you know, the more you realize how much you don't know.\"\n\n**How do you prefer to learn?**",
+                "it": "# La via della conoscenza\n\nHai scelto di esplorare attraverso la **comprensione e l'apprendimento**.\n\nLa conoscenza si costruisce strato su strato:\n\n- Prima viene la curiosità\n- Poi l'indagine\n- Infine la comprensione\n\n> «Più sai, più ti rendi conto di quanto non sai.»\n\n**Come preferisci imparare?**"
+            },
+            "choices": [
+                {
+                    "text": {
+                        "en": "Through theory",
+                        "it": "Attraverso la teoria"
+                    },
+                    "next": "knowledge_theory"
+                },
+                {
+                    "text": {
+                        "en": "Through practice",
+                        "it": "Attraverso la pratica"
+                    },
+                    "next": "knowledge_practice"
+                }
+            ]
+        },
+        "action": {
+            "content": {
+                "en": "# The Path of Action\n\nYou've chosen to move forward through **doing and experimenting**.\n\nAction teaches through direct experience:\n\n- Try something new\n- Observe the results\n- Adjust and try again\n\n> \"The journey of a thousand miles begins with a single step.\"\n\n**What kind of action calls to you?**",
+                "it": "# La via dell'azione\n\nHai scelto di procedere attraverso il **fare e sperimentare**.\n\nL'azione insegna attraverso l'esperienza diretta:\n\n- Prova qualcosa di nuovo\n- Osserva i risultati\n- Aggiusta e riprova\n\n> «Un viaggio di mille miglia inizia con un singolo passo.»\n\n**Che tipo di azione ti attrae?**"
+            },
+            "choices": [
+                {
+                    "text": {
+                        "en": "Bold initiatives",
+                        "it": "Iniziative audaci"
+                    },
+                    "next": "action_bold"
+                },
+                {
+                    "text": {
+                        "en": "Careful steps",
+                        "it": "Passi misurati"
+                    },
+                    "next": "action_careful"
+                }
+            ]
+        },
+        "reflection": {
+            "content": {
+                "en": "# The Path of Reflection\n\nYou've chosen to pause and look **inward**.\n\nThis path has brought you to a place of stillness.\n\nSometimes the most important journey is the one that happens within. Here, in the quiet, you find clarity.\n\n> \"In the silence between thoughts, wisdom emerges.\"\n\n**You have reached a moment of peace.**",
+                "it": "# La via della riflessione\n\nHai scelto di fermarti e guardare **dentro di te**.\n\nQuesto percorso ti ha portato in un luogo di quiete.\n\nA volte il viaggio più importante è quello che avviene dentro di noi. Qui, nel silenzio, trovi chiarezza.\n\n> «Nel silenzio tra i pensieri emerge la saggezza.»\n\n**Hai raggiunto un momento di pace.**"
+            },
+            "choices": []
+        },
+        "knowledge_theory": {
+            "content": {
+                "en": "# Theoretical Understanding\n\nYou prefer to build a **mental framework** first.\n\nTheory provides:\n\n- Structure for organizing ideas\n- Principles that guide application\n- A map before the journey\n\nUnderstanding the *why* before the *how* creates deeper learning.\n\n**Which theoretical approach resonates with you?**",
+                "it": "# Comprensione teorica\n\nPreferisci costruire prima un **quadro mentale**.\n\nLa teoria fornisce:\n\n- Struttura per organizzare le idee\n- Principi che guidano l'applicazione\n- Una mappa prima del viaggio\n\nCapire il *perché* prima del *come* crea un apprendimento più profondo.\n\n**Quale approccio teorico ti risuona di più?**"
+            },
+            "choices": [
+                {
+                    "text": {
+                        "en": "Systematic analysis",
+                        "it": "Analisi sistematica"
+                    },
+                    "next": "theory_systematic"
+                },
+                {
+                    "text": {
+                        "en": "Intuitive synthesis",
+                        "it": "Sintesi intuitiva"
+                    },
+                    "next": "theory_intuitive"
+                },
+                {
+                    "text": {
+                        "en": "Critical questioning",
+                        "it": "Domande critiche"
+                    },
+                    "next": "theory_critical"
+                }
+            ]
+        },
+        "theory_systematic": {
+            "content": {
+                "en": "# Systematic Analysis\n\nYou approach knowledge through **methodical decomposition**.\n\nBreaking complex ideas into components:\n\n- Identify the parts\n- Understand relationships\n- Rebuild with clarity\n\nThe systematic mind finds order in chaos.\n\n**Your analytical skills sharpen.**",
+                "it": "# Analisi sistematica\n\nApprocci la conoscenza attraverso la **scomposizione metodica**.\n\nScomporre idee complesse in componenti:\n\n- Identificare le parti\n- Comprendere le relazioni\n- Ricostruire con chiarezza\n\nLa mente sistematica trova ordine nel caos.\n\n**Le tue capacità analitiche si affinano.**"
+            },
+            "choices": [],
+            "resources": [
+                {
+                    "type": "download",
+                    "label": {
+                        "en": "Analysis Template",
+                        "it": "Template di analisi"
+                    },
+                    "url": "docs/analysis-template.pdf"
+                },
+                {
+                    "type": "link",
+                    "label": {
+                        "en": "Further reading",
+                        "it": "Approfondimenti"
+                    },
+                    "url": "https://example.com/systematic-thinking"
+                }
+            ]
+        },
+        "theory_intuitive": {
+            "content": {
+                "en": "# Intuitive Synthesis\n\nYou grasp knowledge through **holistic understanding**.\n\nSeeing the whole picture:\n\n- Patterns emerge naturally\n- Connections reveal themselves\n- Understanding flows\n\nThe intuitive mind sees forests, not just trees.\n\n**Your synthetic vision expands.**",
+                "it": "# Sintesi intuitiva\n\nAfferri la conoscenza attraverso la **comprensione olistica**.\n\nVedere il quadro completo:\n\n- I pattern emergono naturalmente\n- Le connessioni si rivelano\n- La comprensione fluisce\n\nLa mente intuitiva vede foreste, non solo alberi.\n\n**La tua visione sintetica si espande.**"
+            },
+            "choices": []
+        },
+        "theory_critical": {
+            "content": {
+                "en": "# Critical Questioning\n\nYou deepen knowledge through **persistent inquiry**.\n\nThe power of questions:\n\n- Challenge assumptions\n- Expose hidden premises\n- Refine understanding\n\nThe critical mind accepts nothing without examination.\n\n**Your questioning spirit grows stronger.**",
+                "it": "# Domande critiche\n\nApprofondisci la conoscenza attraverso l'**indagine persistente**.\n\nIl potere delle domande:\n\n- Sfidare le assunzioni\n- Esporre premesse nascoste\n- Raffinare la comprensione\n\nLa mente critica non accetta nulla senza esame.\n\n**Il tuo spirito interrogativo si rafforza.**"
+            },
+            "choices": []
+        },
+        "knowledge_practice": {
+            "content": {
+                "en": "# Learning by Doing\n\nEven on the path of knowledge, you recognize that **experience is the best teacher**.\n\nPractical knowledge is:\n\n- Embodied, not just intellectual\n- Tested against reality\n- Refined through iteration\n\nThe hands remember what the mind forgets.\n\n**Your practical wisdom grows.**",
+                "it": "# Imparare facendo\n\nAnche sulla via della conoscenza, riconosci che l'**esperienza è la migliore maestra**.\n\nLa conoscenza pratica è:\n\n- Incarnata, non solo intellettuale\n- Testata contro la realtà\n- Raffinata attraverso l'iterazione\n\nLe mani ricordano ciò che la mente dimentica.\n\n**La tua saggezza pratica cresce.**"
+            },
+            "choices": []
+        },
+        "action_bold": {
+            "content": {
+                "en": "# Bold Action\n\nYou choose to move with **courage and conviction**.\n\nBold action means:\n\n- Accepting uncertainty\n- Learning from failures\n- Creating momentum\n\nFortune favors the bold, they say. But boldness is not recklessness; it's calculated courage.\n\n**Your bold spirit leads the way.**",
+                "it": "# Azione audace\n\nScegli di muoverti con **coraggio e convinzione**.\n\nL'azione audace significa:\n\n- Accettare l'incertezza\n- Imparare dai fallimenti\n- Creare slancio\n\nLa fortuna aiuta gli audaci, dicono. Ma l'audacia non è sconsideratezza; è coraggio calcolato.\n\n**Il tuo spirito audace guida la via.**"
+            },
+            "choices": []
+        },
+        "action_careful": {
+            "content": {
+                "en": "# Measured Steps\n\nYou choose to advance with **deliberation and care**.\n\nCareful action means:\n\n- Minimizing unnecessary risks\n- Building on solid foundations\n- Sustainable progress\n\nSlow and steady wins the race. Each small step compounds into great distance.\n\n**Your thoughtful approach bears fruit.**",
+                "it": "# Passi misurati\n\nScegli di avanzare con **deliberazione e cura**.\n\nL'azione ponderata significa:\n\n- Minimizzare i rischi non necessari\n- Costruire su basi solide\n- Progresso sostenibile\n\nChi va piano va sano e va lontano. Ogni piccolo passo si somma in grande distanza.\n\n**Il tuo approccio riflessivo dà i suoi frutti.**"
+            },
+            "choices": []
+        }
+    }
+}
