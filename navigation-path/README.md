@@ -221,6 +221,24 @@ For multiple training modules, create separate folders with independent config f
 
 Chrome, Firefox, Safari, Edge (all modern versions)
 
+## 🖼️ Screenshots
+
+### Navigator Interface
+
+![Navigator Interface](images/navigator-demo.png)
+
+### Journey Map
+
+![Journey Map](images/journey-map.png)
+
+### Scenario Editor
+
+![Scenario Editor](images/editor-demo.png)
+
+### Create Node Popup
+
+![Create Node](images/create-node-popup.png)
+
 ## 📄 License
 
 MIT License - see [LICENSE](LICENSE) file for details.
