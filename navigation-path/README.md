@@ -32,6 +32,7 @@ branching-navigator/
 ├── scenario-editor.html        # Visual editor for creating scenarios
 ├── scenario-quiz.json          # Example: bilingual quiz scenario
 ├── scenario-workflow.json      # Example: monolingual workflow scenario
+├── scenario-sample.json        # Template: bilingual narrative (good starting point)
 ├── start-navigator.bat         # Quick start for navigator (Windows)
 ├── start-editor.bat            # Quick start for editor (Windows)
 ├── README.md                   # This file
@@ -71,7 +72,9 @@ The `config.json` file controls which scenario to load and available languages:
 ```json
 {
     "scenario": "scenario-quiz.json",
-    "languages": ["en", "it"]
+    "languages": ["en", "it"],
+    "defaultLanguage": "en",
+    "showCredits": true
 }
 ```
 
@@ -79,6 +82,8 @@ The `config.json` file controls which scenario to load and available languages:
 |-------|-------------|
 | `scenario` | JSON file containing the scenario data |
 | `languages` | Array of language codes. Use `["en", "it"]` for bilingual, `["en"]` for English only |
+| `defaultLanguage` | Initial language on load (optional, defaults to first in array) |
+| `showCredits` | Show author credits footer (optional, defaults to `true`) |
 
 To switch scenarios, simply change the `scenario` value and refresh.
 
@@ -154,6 +159,8 @@ The scenario is defined in a simple JSON format:
     }
 }
 ```
+
+> ⚠️ **Required**: The `translations` section is mandatory. Without it, navigation buttons will have no text. Each language in `config.languages` must have a corresponding entry with all keys: `step`, `restart`, `endOfPath`, `resources`, `viewMap`, `mapOf`, `back`, `download`, `openLink`, `watchVideo`.
 
 ### Monolingual Scenarios
 

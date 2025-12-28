@@ -23,8 +23,10 @@
         .btn-secondary:hover { background: #4b5563; }
         .btn-success { background: #10b981; color: white; }
         .btn-success:hover { background: #059669; }
-        .btn-danger { background: #ef4444; color: white; }
+        .btn-danger { background: #ef4444; color: white; text-transform: uppercase; font-weight: 600; }
         .btn-danger:hover { background: #dc2626; }
+        .btn-close { background: #ef4444; color: white; text-transform: uppercase; font-weight: 600; }
+        .btn-close:hover { background: #dc2626; }
         .node-list { flex: 1; overflow-y: auto; padding: 0.5rem; }
         .node-item { padding: 0.75rem; margin-bottom: 0.5rem; background: #1a1a2e; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
         .node-item:hover { border-color: #4b5563; }
@@ -56,9 +58,7 @@
         .choice-number { font-size: 0.8rem; color: #6366f1; font-weight: 600; }
         .form-select { padding: 0.6rem 0.75rem; border-radius: 6px; border: 1px solid #374151; background: #1a1a2e; color: #e0e0e0; font-size: 0.9rem; width: 100%; }
         .form-select:focus { outline: none; border-color: #6366f1; }
-        .add-button { width: 100%; padding: 0.75rem; border: 2px dashed #374151; border-radius: 6px; background: transparent; color: #6b7280; cursor: pointer; transition: all 0.2s; font-size: 0.9rem; }
-        .add-button:hover { border-color: #6366f1; color: #6366f1; }
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.8); display: flex; align-items: center; justify-content: center; z-index: 100; }
+                .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.8); display: flex; align-items: center; justify-content: center; z-index: 100; }
         .modal-content { background: #16213e; border-radius: 12px; padding: 1.5rem; width: 90%; max-width: 550px; max-height: 90vh; overflow-y: auto; border: 1px solid #2a2a4a; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
         .modal-header h2, .modal-header h3 { margin: 0; color: #fff; }
@@ -87,6 +87,9 @@
         .welcome-screen p { color: #9ca3af; margin-bottom: 2rem; max-width: 400px; }
         .welcome-actions { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
         .welcome-actions .btn { padding: 0.75rem 1.5rem; font-size: 1rem; }
+        .credits { position: fixed; bottom: 0.5rem; left: 0.5rem; color: rgba(255, 255, 255, 0.3); font-size: 0.65rem; z-index: 10; }
+        .credits a { color: rgba(255, 255, 255, 0.4); text-decoration: none; }
+        .credits a:hover { color: #6366f1; }
     </style>
 </head>
 <body>
@@ -94,12 +97,18 @@
     
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
-        
+
+        // ============================================================
+        // DEFAULT DATA
+        // ============================================================
         const defaultTranslationsTemplate = {
             step: 'Step', restart: 'Start Over', endOfPath: 'End of this path', resources: 'Resources',
             viewMap: 'View Map', mapOf: 'Map of', back: 'Back', download: 'Download', openLink: 'Open', watchVideo: 'Watch'
         };
         
+        // ============================================================
+        // HELPER FUNCTIONS
+        // ============================================================
         const calculateNodeLevels = (nodes, startNode) => {
             const levels = {};
             const visited = new Set();
@@ -126,11 +135,15 @@
             return { level: 0, position: 1 };
         };
         
+        // ============================================================
+        // TREE MAP OVERLAY COMPONENT
+        // ============================================================
         const TreeMapOverlay = ({ nodes, startNode, selectedNode, onSelectNode, onClose, languages }) => {
             const levels = calculateNodeLevels(nodes, startNode);
             const maxLevel = Math.max(...Object.keys(levels).map(Number), 1);
             const primaryLang = languages[0];
-            const levelHeight = 100, nodeWidth = 140, nodeHeight = 44, padding = 60;
+            // Tree layout constants (px): vertical spacing, horizontal spacing, node box height, SVG padding
+            const levelHeight = 120, nodeWidth = 140, nodeHeight = 44, padding = 60;
             const positions = {};
             let maxWidth = 0;
             Object.entries(levels).forEach(([level, nodeIds]) => { maxWidth = Math.max(maxWidth, nodeIds.length * nodeWidth); });
@@ -158,7 +171,7 @@
                             <span><span className="legend-dot legend-selected"></span> Selected</span>
                             <span><span className="legend-dot legend-orphan"></span> Orphan</span>
                         </div>
-                        <button className="btn btn-secondary" onClick={onClose}>✕ Close</button>
+                        <button className="btn btn-close" onClick={onClose}>X</button>
                     </div>
                     <div className="map-overlay-content">
                         <svg width={Math.max(maxWidth + padding * 2, 400)} height={Math.max((maxLevel + 1) * levelHeight + padding, 300)} style={{ display: 'block', margin: 'auto' }}>
@@ -173,7 +186,7 @@
                                 return (
                                     <g key={nodeId} style={{ cursor: 'pointer' }} onClick={() => { onSelectNode(nodeId); onClose(); }}>
                                         <rect x={pos.x - nodeWidth/2 + 10} y={pos.y - nodeHeight/2} width={nodeWidth - 20} height={nodeHeight} rx={8} fill={fill} stroke={stroke} strokeWidth={sw} />
-                                        <text x={pos.x} y={pos.y - 6} textAnchor="middle" dominantBaseline="middle" fill="#fff" fontSize="11" fontWeight="500">{title.length > 12 ? title.slice(0, 10) + '..' : title}</text>
+                                        <text x={pos.x} y={pos.y - 6} textAnchor="middle" dominantBaseline="middle" fill="#fff" fontSize="11" fontWeight="500">{title.length > 15 ? title.slice(0, 12) + '...' : title}</text>
                                         <text x={pos.x} y={pos.y + 10} textAnchor="middle" dominantBaseline="middle" fill="#9ca3af" fontSize="9" fontFamily="monospace">{nodeId.length > 14 ? nodeId.slice(0, 12) + '..' : nodeId}</text>
                                     </g>
                                 );
@@ -184,6 +197,9 @@
             );
         };
         
+        // ============================================================
+        // SCENARIO FACTORY
+        // ============================================================
         const createEmptyScenario = (languages) => {
             const content = {}, title = {}, description = {}, translations = {};
             languages.forEach(lang => {
@@ -195,6 +211,9 @@
             return { meta: { title, description, author: '' }, translations, startNode: 'start', nodes: { start: { content, choices: [], resources: [] } } };
         };
         
+        // ============================================================
+        // NODE LIST COMPONENT
+        // ============================================================
         const NodeList = ({ scenario, selectedNode, onSelectNode, startNode, showMap, onToggleMap, languages }) => {
             const nodeIds = Object.keys(scenario.nodes);
             const primaryLang = languages[0];
@@ -226,6 +245,9 @@
             );
         };
         
+        // ============================================================
+        // CREATE NODE POPUP COMPONENT
+        // ============================================================
         const CreateNodePopup = ({ parentNodeId, existingNodeIds, onCreateNode, onCreated, onClose, languages, onUpdateChoiceText }) => {
             const suggestId = () => { let base = `${parentNodeId}_child`, c = 1, id = base; while (existingNodeIds.includes(id)) { id = `${base}_${c}`; c++; } return id; };
             const [nodeId, setNodeId] = useState(suggestId());
@@ -246,7 +268,7 @@
             return (
                 <div className="modal-overlay">
                     <div className="modal-content">
-                        <div className="modal-header"><h3>Create New Node</h3><button className="btn btn-secondary" onClick={onClose} style={{ padding: '0.25rem 0.5rem' }}>✕</button></div>
+                        <div className="modal-header"><h3>Create New Node</h3><button className="btn btn-close" onClick={onClose} style={{ padding: '0.25rem 0.5rem' }}>✕</button></div>
                         <div className="form-group">
                             <label className="form-label">Node ID</label>
                             <input type="text" className="form-input" value={nodeId} onChange={(e) => { setNodeId(e.target.value); setError(''); }} />
@@ -271,13 +293,16 @@
                         ))}
                         <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
                             <button className="btn btn-success" onClick={handleCreate}>Create</button>
-                            <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
+                            <button className="btn btn-danger" onClick={onClose}>Cancel</button>
                         </div>
                     </div>
                 </div>
             );
         };
         
+        // ============================================================
+        // CHOICE EDITOR COMPONENT
+        // ============================================================
         const ChoiceEditor = ({ choice, index, nodeIds, parentNodeId, onChange, onRemove, onCreateNode, languages }) => {
             const [showCreate, setShowCreate] = useState(false);
             const [pendingChoiceText, setPendingChoiceText] = useState(null);
@@ -318,6 +343,9 @@
             );
         };
         
+        // ============================================================
+        // RESOURCE EDITOR COMPONENT
+        // ============================================================
         const ResourceEditor = ({ resource, index, onChange, onRemove, languages }) => {
             const single = languages.length === 1;
             return (
@@ -352,6 +380,9 @@
             );
         };
         
+        // ============================================================
+        // NODE EDITOR COMPONENT
+        // ============================================================
         const NodeEditor = ({ nodeId, node, nodeIds, startNode, onUpdateNode, onDeleteNode, onSetStartNode, onRenameNode, onCreateNode, languages }) => {
             const [newNodeId, setNewNodeId] = useState(nodeId);
             const [showRename, setShowRename] = useState(false);
@@ -377,7 +408,7 @@
                                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                                     <input type="text" className="form-input" style={{ width: '150px' }} value={newNodeId} onChange={(e) => setNewNodeId(e.target.value.replace(/[^a-zA-Z0-9_]/g, ''))} />
                                     <button className="btn btn-primary" onClick={handleRename}>OK</button>
-                                    <button className="btn btn-secondary" onClick={() => { setShowRename(false); setNewNodeId(nodeId); }}>Cancel</button>
+                                    <button className="btn btn-danger" onClick={() => { setShowRename(false); setNewNodeId(nodeId); }}>Cancel</button>
                                 </div>
                             )}
                             {nodeId !== startNode && <button className="btn btn-success" onClick={() => onSetStartNode(nodeId)}>Set as Start</button>}
@@ -398,19 +429,22 @@
                     <div className="form-section">
                         <h3>🔀 Choices ({(node.choices || []).length})</h3>
                         {(node.choices || []).map((choice, i) => <ChoiceEditor key={i} choice={choice} index={i} nodeIds={nodeIds} parentNodeId={nodeId} onChange={(c) => updateChoice(i, c)} onRemove={() => removeChoice(i)} onCreateNode={onCreateNode} languages={languages} />)}
-                        <button className="add-button" onClick={addChoice}>+ Add Choice</button>
+                        <button className="btn btn-success" onClick={addChoice}>+ Add Choice</button>
                         {(node.choices || []).length === 0 && <p style={{ fontSize: '0.8rem', color: '#9ca3af', marginTop: '0.5rem', textAlign: 'center' }}>No choices = terminal node</p>}
                     </div>
                     
                     <div className="form-section">
                         <h3>📎 Resources ({(node.resources || []).length})</h3>
                         {(node.resources || []).map((r, i) => <ResourceEditor key={i} resource={r} index={i} onChange={(res) => updateResource(i, res)} onRemove={() => removeResource(i)} languages={languages} />)}
-                        <button className="add-button" onClick={addResource}>+ Add Resource</button>
+                        <button className="btn btn-success" onClick={addResource}>+ Add Resource</button>
                     </div>
                 </div>
             );
         };
         
+        // ============================================================
+        // META EDITOR COMPONENT
+        // ============================================================
         const MetaEditor = ({ meta, translations, onUpdate, onClose, languages }) => {
             const [localMeta, setLocalMeta] = useState(meta);
             const [localTrans, setLocalTrans] = useState(translations);
@@ -419,7 +453,7 @@
             return (
                 <div className="modal-overlay">
                     <div className="modal-content" style={{ maxWidth: '650px' }}>
-                        <div className="modal-header"><h2>Scenario Settings</h2><button className="btn btn-secondary" onClick={onClose}>✕</button></div>
+                        <div className="modal-header"><h2>Scenario Settings</h2><button className="btn btn-close" onClick={onClose}>✕</button></div>
                         {languages.map(lang => (
                             <div key={lang}>
                                 <div className="form-group">
@@ -453,13 +487,16 @@
                         ))}
                         <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
                             <button className="btn btn-primary" onClick={handleSave}>Save</button>
-                            <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
+                            <button className="btn btn-danger" onClick={onClose}>Cancel</button>
                         </div>
                     </div>
                 </div>
             );
         };
         
+        // ============================================================
+        // WELCOME SCREEN COMPONENT
+        // ============================================================
         const WelcomeScreen = ({ onNew, onOpen }) => (
             <div className="welcome-screen">
                 <h2>Scenario Editor</h2>
@@ -471,6 +508,9 @@
             </div>
         );
         
+        // ============================================================
+        // MAIN SCENARIO EDITOR COMPONENT
+        // ============================================================
         const ScenarioEditor = () => {
             const [languages, setLanguages] = useState(['en']);
             const [scenario, setScenario] = useState(null);
@@ -563,6 +603,9 @@
                         <div className="main-editor">
                             <WelcomeScreen onNew={handleNew} onOpen={triggerFileOpen} />
                         </div>
+                        <div className="credits">
+                            Created by <a href="https://ai-know.pro" target="_blank" rel="noopener noreferrer">Paolo Dalprato</a>
+                        </div>
                     </div>
                 );
             }
@@ -606,6 +649,10 @@
                     </div>
                     
                     {showMetaEditor && <MetaEditor meta={scenario.meta} translations={scenario.translations || {}} onUpdate={handleUpdateMeta} onClose={() => setShowMetaEditor(false)} languages={languages} />}
+
+                    <div className="credits">
+                        Created by <a href="https://ai-know.pro" target="_blank" rel="noopener noreferrer">Paolo Dalprato</a>
+                    </div>
                 </div>
             );
         };

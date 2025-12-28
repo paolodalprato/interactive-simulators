@@ -10,6 +10,32 @@
         },
         "author": "Paolo Dalprato"
     },
+    "translations": {
+        "en": {
+            "step": "Step",
+            "restart": "Start Over",
+            "endOfPath": "End of this path",
+            "resources": "Resources",
+            "viewMap": "View Map",
+            "mapOf": "Map of",
+            "back": "Back",
+            "download": "Download",
+            "openLink": "Open",
+            "watchVideo": "Watch"
+        },
+        "it": {
+            "step": "Passo",
+            "restart": "Ricomincia",
+            "endOfPath": "Fine del percorso",
+            "resources": "Risorse",
+            "viewMap": "Vedi mappa",
+            "mapOf": "Mappa di",
+            "back": "Indietro",
+            "download": "Scarica",
+            "openLink": "Apri",
+            "watchVideo": "Guarda"
+        }
+    },
     "startNode": "start",
     "nodes": {
         "start": {
