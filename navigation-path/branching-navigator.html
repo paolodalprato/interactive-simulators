@@ -344,7 +344,6 @@
             margin: auto;
         }
         
-        /* Tree visualization */
         .tree-node {
             cursor: pointer;
             transition: all 0.3s ease;
@@ -383,7 +382,6 @@
             color: #6366f1;
         }
         
-        /* Loading state */
         .loading {
             display: flex;
             justify-content: center;
@@ -412,6 +410,40 @@
         const { useState, useEffect } = React;
         
         // ============================================================
+        // Default translations (fallback)
+        // ============================================================
+        const defaultTranslations = {
+            en: {
+                step: 'Step',
+                restart: 'Start Over',
+                endOfPath: 'End of this path',
+                resources: 'Resources',
+                viewMap: 'View Map',
+                mapOf: 'Map of',
+                back: 'Back',
+                download: 'Download',
+                openLink: 'Open',
+                watchVideo: 'Watch',
+                loading: 'Loading...',
+                errorLoading: 'Error loading scenario'
+            },
+            it: {
+                step: 'Passo',
+                restart: 'Ricomincia',
+                endOfPath: 'Fine del percorso',
+                resources: 'Risorse',
+                viewMap: 'Vedi mappa',
+                mapOf: 'Mappa di',
+                back: 'Indietro',
+                download: 'Scarica',
+                openLink: 'Apri',
+                watchVideo: 'Guarda',
+                loading: 'Caricamento...',
+                errorLoading: 'Errore nel caricamento dello scenario'
+            }
+        };
+        
+        // ============================================================
         // Markdown Parser Component
         // ============================================================
         const MarkdownContent = ({ content }) => {
@@ -424,9 +456,7 @@
                 let inList = false;
                 
                 const processInlineMarkdown = (line) => {
-                    // Bold
                     line = line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-                    // Italic
                     line = line.replace(/\*(.+?)\*/g, '<em>$1</em>');
                     return line;
                 };
@@ -446,7 +476,6 @@
                 };
                 
                 lines.forEach((line, index) => {
-                    // Headers
                     if (line.startsWith('# ')) {
                         flushList();
                         elements.push(
@@ -457,28 +486,20 @@
                         elements.push(
                             <h2 key={index} dangerouslySetInnerHTML={{ __html: processInlineMarkdown(line.slice(3)) }} />
                         );
-                    }
-                    // Blockquote
-                    else if (line.startsWith('> ')) {
+                    } else if (line.startsWith('> ')) {
                         flushList();
                         elements.push(
                             <blockquote key={index} dangerouslySetInnerHTML={{ __html: processInlineMarkdown(line.slice(2)) }} />
                         );
-                    }
-                    // List item
-                    else if (line.startsWith('- ')) {
+                    } else if (line.startsWith('- ')) {
                         inList = true;
                         currentList.push(line.slice(2));
-                    }
-                    // Paragraph
-                    else if (line.trim()) {
+                    } else if (line.trim()) {
                         flushList();
                         elements.push(
                             <p key={index} dangerouslySetInnerHTML={{ __html: processInlineMarkdown(line) }} />
                         );
-                    }
-                    // Empty line - might end a list
-                    else if (inList) {
+                    } else if (inList) {
                         flushList();
                     }
                 });
@@ -494,13 +515,10 @@
         // Tree Map Component
         // ============================================================
         const TreeMap = ({ scenarioData, nodes, visitedNodes, currentNode, onNodeClick, language }) => {
-            // Calculate tree structure
             const buildTreeLayout = () => {
                 const nodePositions = {};
-                const levelWidths = {};
                 const nodesByLevel = {};
                 
-                // BFS to assign levels
                 const queue = [{ id: scenarioData.startNode, level: 0 }];
                 const visited = new Set();
                 
@@ -522,7 +540,6 @@
                     }
                 }
                 
-                // Calculate positions
                 const levelHeight = 120;
                 const nodeWidth = 140;
                 const padding = 60;
@@ -558,7 +575,6 @@
             
             const { positions, width, height } = buildTreeLayout();
             
-            // Draw connections
             const connections = [];
             Object.keys(nodes).forEach(nodeId => {
                 const node = nodes[nodeId];
@@ -579,11 +595,9 @@
                 const node = nodes[nodeId];
                 if (!node) return nodeId;
                 
-                // Extract title from content
-                const content = node.content[language] || node.content.en;
+                const content = node.content[language] || node.content[Object.keys(node.content)[0]];
                 const match = content.match(/^#\s+(.+)$/m);
                 if (match) {
-                    // Truncate if too long
                     const title = match[1].replace(/\*\*/g, '');
                     return title.length > 15 ? title.slice(0, 12) + '...' : title;
                 }
@@ -596,7 +610,6 @@
                     height={Math.max(height, 300)}
                     style={{ display: 'block' }}
                 >
-                    {/* Connections */}
                     {connections.map((conn, index) => (
                         <line
                             key={`conn-${index}`}
@@ -610,7 +623,6 @@
                         />
                     ))}
                     
-                    {/* Nodes */}
                     {Object.keys(positions).map(nodeId => {
                         const pos = positions[nodeId];
                         const isVisited = visitedNodes.has(nodeId);
@@ -653,6 +665,7 @@
         // Main Branching Navigator Component
         // ============================================================
         const BranchingNavigator = () => {
+            const [config, setConfig] = useState(null);
             const [scenarioData, setScenarioData] = useState(null);
             const [currentNode, setCurrentNode] = useState(null);
             const [visitedNodes, setVisitedNodes] = useState(new Set());
@@ -662,43 +675,23 @@
             const [showMap, setShowMap] = useState(false);
             const [loading, setLoading] = useState(true);
             const [error, setError] = useState(null);
+            const [translations, setTranslations] = useState(defaultTranslations);
+            const [scenarioFileName, setScenarioFileName] = useState('');
             
-            // Translations
-            const translations = {
-                en: {
-                    step: 'Step',
-                    of: 'of',
-                    restart: 'Start Over',
-                    endOfPath: 'End of this path',
-                    resources: 'Resources',
-                    viewMap: 'View Map',
-                    mapOf: 'Map of',
-                    download: 'Download',
-                    openLink: 'Open',
-                    watchVideo: 'Watch'
-                },
-                it: {
-                    step: 'Passo',
-                    of: 'di',
-                    restart: 'Ricomincia',
-                    endOfPath: 'Fine del percorso',
-                    resources: 'Risorse',
-                    viewMap: 'Vedi mappa',
-                    mapOf: 'Mappa di',
-                    download: 'Scarica',
-                    openLink: 'Apri',
-                    watchVideo: 'Guarda'
-                }
-            };
-            
-            const t = translations[language];
-            
-            // Scenario file name for map title
-            const scenarioFileName = 'scenario-data.json';
-            
-            // Load scenario data
+            // Load config, then scenario
             useEffect(() => {
-                fetch('scenario-data.json')
+                fetch('config.json')
+                    .then(response => {
+                        if (!response.ok) throw new Error('Failed to load config.json');
+                        return response.json();
+                    })
+                    .then(configData => {
+                        setConfig(configData);
+                        setLanguage(configData.defaultLanguage || 'en');
+                        setScenarioFileName(configData.scenario);
+                        
+                        return fetch(configData.scenario);
+                    })
                     .then(response => {
                         if (!response.ok) throw new Error('Failed to load scenario');
                         return response.json();
@@ -708,6 +701,16 @@
                         setCurrentNode(data.startNode);
                         setVisitedNodes(new Set([data.startNode]));
                         setPath([data.startNode]);
+                        
+                        // Merge translations: default <- scenario
+                        if (data.translations) {
+                            const merged = { ...defaultTranslations };
+                            Object.keys(data.translations).forEach(lang => {
+                                merged[lang] = { ...defaultTranslations[lang], ...data.translations[lang] };
+                            });
+                            setTranslations(merged);
+                        }
+                        
                         setLoading(false);
                     })
                     .catch(err => {
@@ -716,8 +719,9 @@
                     });
             }, []);
             
+            const t = translations[language] || translations.en;
+            
             const handleChoice = (nextNode) => {
-                // Record the choice made from current node
                 setChoicesMade(prev => {
                     const newMap = new Map(prev);
                     newMap.set(currentNode, nextNode);
@@ -731,7 +735,6 @@
             
             const handleNodeClick = (nodeId) => {
                 if (visitedNodes.has(nodeId)) {
-                    // Find index in path and truncate
                     const pathIndex = path.indexOf(nodeId);
                     if (pathIndex !== -1) {
                         setPath(path.slice(0, pathIndex + 1));
@@ -756,23 +759,24 @@
                 }
             };
             
-            // Check if a choice was previously made from this node
             const getPreviousChoice = () => {
                 return choicesMade.get(currentNode);
             };
             
             const canGoBack = path.length > 1;
+            const isMultilingual = config?.languages?.length > 1;
+            const showCredits = config?.showCredits !== false;
             
             if (loading) {
-                return <div className="loading">Loading scenario...</div>;
+                return <div className="loading">{t.loading}</div>;
             }
             
             if (error) {
                 return (
                     <div className="error">
-                        <div>Error: {error}</div>
+                        <div>{t.errorLoading}: {error}</div>
                         <div style={{ fontSize: '0.875rem', color: '#888' }}>
-                            Make sure scenario-data.json is in the same folder and you're running from a web server.
+                            Make sure config.json and scenario file are in the same folder.
                         </div>
                     </div>
                 );
@@ -781,51 +785,45 @@
             const node = scenarioData.nodes[currentNode];
             if (!node) return <div className="error">Node not found: {currentNode}</div>;
             
-            const content = node.content[language] || node.content.en;
+            const content = node.content[language] || node.content[Object.keys(node.content)[0]];
             const choices = node.choices || [];
             const resources = node.resources || [];
             const isTerminal = choices.length === 0;
             const previousChoice = getPreviousChoice();
             
-            // Calculate total reachable nodes for progress
             const totalNodes = Object.keys(scenarioData.nodes).length;
             const currentStep = path.length;
             
             return (
                 <>
                     <div className="slide-container">
-                        {/* Back Button */}
                         {canGoBack && (
                             <button className="back-button" onClick={handleGoBack}>
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <polyline points="15 18 9 12 15 6" />
                                 </svg>
-                                {language === 'it' ? 'Indietro' : 'Back'}
+                                {t.back}
                             </button>
                         )}
                         
-                        {/* Language Toggle */}
-                        <div className="language-toggle">
-                            <button 
-                                className={language === 'en' ? 'active' : ''}
-                                onClick={() => setLanguage('en')}
-                            >
-                                EN
-                            </button>
-                            <button 
-                                className={language === 'it' ? 'active' : ''}
-                                onClick={() => setLanguage('it')}
-                            >
-                                IT
-                            </button>
-                        </div>
+                        {isMultilingual && (
+                            <div className="language-toggle">
+                                {config.languages.map(lang => (
+                                    <button 
+                                        key={lang}
+                                        className={language === lang ? 'active' : ''}
+                                        onClick={() => setLanguage(lang)}
+                                    >
+                                        {lang.toUpperCase()}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                         
-                        {/* Progress Indicator */}
                         <div className="progress-indicator">
                             {t.step} {currentStep} / {totalNodes}
                         </div>
                         
-                        {/* Main Content */}
                         <div className="slide-content">
                             {isTerminal && (
                                 <div className="terminal-badge">{t.endOfPath}</div>
@@ -833,11 +831,10 @@
                             
                             <MarkdownContent content={content} />
                             
-                            {/* Choices */}
                             {choices.length > 0 && (
                                 <div className="choices-container">
                                     {choices.map((choice, index) => {
-                                        const choiceText = choice.text[language] || choice.text.en;
+                                        const choiceText = choice.text[language] || choice.text[Object.keys(choice.text)[0]];
                                         const isThisChoiceMade = previousChoice === choice.next;
                                         const isExplored = visitedNodes.has(choice.next) && !isThisChoiceMade;
                                         
@@ -854,23 +851,19 @@
                                 </div>
                             )}
                             
-                            {/* Terminal Node - Restart Button */}
                             {isTerminal && (
                                 <button className="restart-button" onClick={handleRestart}>
                                     {t.restart}
                                 </button>
                             )}
                             
-                            {/* Resources */}
                             {resources.length > 0 && (
                                 <div className="resources-section">
                                     <div className="resources-title">{t.resources}</div>
                                     {resources.map((resource, index) => {
-                                        const label = resource.label[language] || resource.label.en;
+                                        const label = resource.label[language] || resource.label[Object.keys(resource.label)[0]];
                                         const icon = resource.type === 'download' ? '📥' : 
                                                      resource.type === 'video' ? '🎬' : '🔗';
-                                        const actionText = resource.type === 'download' ? t.download :
-                                                          resource.type === 'video' ? t.watchVideo : t.openLink;
                                         
                                         return (
                                             <a
@@ -889,7 +882,6 @@
                             )}
                         </div>
                         
-                        {/* Map Button */}
                         <button className="map-button" onClick={() => setShowMap(true)}>
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
@@ -900,7 +892,6 @@
                         </button>
                     </div>
                     
-                    {/* Map Overlay */}
                     {showMap && (
                         <div className="map-overlay">
                             <div className="map-header">
@@ -925,10 +916,11 @@
                         </div>
                     )}
                     
-                    {/* Credits */}
-                    <div className="credits">
-                        Created by <a href="https://ai-know.pro" target="_blank" rel="noopener noreferrer">Paolo Dalprato</a>
-                    </div>
+                    {showCredits && (
+                        <div className="credits">
+                            Created by <a href="https://ai-know.pro" target="_blank" rel="noopener noreferrer">Paolo Dalprato</a>
+                        </div>
+                    )}
                 </>
             );
         };

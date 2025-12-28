@@ -1,0 +1,6 @@
+{
+    "scenario": "scenario-quiz.json",
+    "languages": ["en", "it"],
+    "defaultLanguage": "en",
+    "showCredits": true
+}
