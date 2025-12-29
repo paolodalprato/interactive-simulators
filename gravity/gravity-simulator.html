@@ -22,7 +22,28 @@
     <div id="root"></div>
     
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+        const { useState, useEffect, useRef, useCallback, useMemo } = React;
+
+        // ============ CONSTANTS ============
+
+        // Canvas dimensions
+        const CANVAS_WIDTH = 800;
+        const CANVAS_HEIGHT = 600;
+
+        // Physics parameters
+        const DT = 0.016;                    // Time step (~60 FPS)
+        const MIN_DIST_SQ = 100;             // Minimum distance squared to prevent infinite forces
+        const BOUNCE_DAMPING = 0.8;          // Energy retained on wall collision (20% lost)
+        const RADIUS_FACTOR = 3;             // Particle radius = sqrt(mass) * RADIUS_FACTOR
+        const INITIAL_MIN_MASS = 1;          // Minimum initial particle mass
+        const INITIAL_MAX_MASS = 20;         // Maximum initial particle mass
+
+        // Color mapping
+        const MIN_MASS_COLOR = 1;            // Mass mapped to red (hue 0°)
+        const MAX_MASS_COLOR = 50;           // Mass mapped to violet (hue 270°)
+        const HUE_RANGE = 270;               // Degrees of hue spectrum used
+
+        // ============ COMPONENT ============
 
         const GravitySimulator = () => {
           const canvasRef = useRef(null);
@@ -31,15 +52,15 @@
           const [language, setLanguage] = useState('en');
           const animationRef = useRef(null);
           
-          // Parametri configurabili
+          // ============ STATE ============
+
+          // Configurable parameters
           const [numParticles, setNumParticles] = useState(100);
           const [initialVelocity, setInitialVelocity] = useState(0.5);
           const [gravitationalConstant, setGravitationalConstant] = useState(100);
-          
-          const canvasWidth = 800;
-          const canvasHeight = 600;
-          
-          // Testi bilingui
+
+          // ============ TRANSLATIONS ============
+
           const texts = {
             it: {
               title: "Simulatore gravità 2D",
@@ -63,6 +84,7 @@
               activeParticles: "Particelle attive",
               legend: "Legenda colori",
               legendDesc: "Il colore indica la massa: rosso (piccola) → arancione → giallo → verde → blu → violetto (grande)",
+              massRange: "Range massa attuale",
               credits: "Creato da",
               scientificNote: "Nota: questo è un modello semplificato per scopi didattici. I sistemi gravitazionali reali seguono le stesse leggi ma con scale e complessità molto maggiori."
             },
@@ -88,38 +110,53 @@
               activeParticles: "Active particles",
               legend: "Color legend",
               legendDesc: "Color indicates mass: red (small) → orange → yellow → green → blue → violet (large)",
+              massRange: "Current mass range",
               credits: "Created by",
               scientificNote: "Note: this is a simplified model for educational purposes. Real gravitational systems follow the same laws but at much larger scales and complexity."
             }
           };
           
           const t = texts[language];
-          
-          // Converte massa in colore (rosso → violetto seguendo spettro)
+
+          // ============ HELPERS ============
+
+          // Convert mass to color (red → violet following spectrum)
           const massToColor = (mass) => {
-            const minMass = 1;
-            const maxMass = 50;
-            const normalized = Math.min(Math.max((mass - minMass) / (maxMass - minMass), 0), 1);
-            
-            // Spettro: rosso (0°) → violetto (270°)
-            const hue = 0 + normalized * 270;
+            const normalized = Math.min(Math.max((mass - MIN_MASS_COLOR) / (MAX_MASS_COLOR - MIN_MASS_COLOR), 0), 1);
+            const hue = normalized * HUE_RANGE;
             return `hsl(${hue}, 80%, 50%)`;
           };
-          
-          // Inizializza particelle
+
+          // Calculate particle statistics for dynamic legend
+          const particleStats = useMemo(() => {
+            const alive = particles.filter(p => p.alive);
+            if (alive.length === 0) return { minMass: 0, maxMass: 0, count: 0 };
+
+            const masses = alive.map(p => p.mass);
+            return {
+              minMass: Math.min(...masses),
+              maxMass: Math.max(...masses),
+              count: alive.length
+            };
+          }, [particles]);
+
+          // ============ PARTICLE MANAGEMENT ============
+
+          // Initialize particles with random positions and velocities
           const initializeParticles = () => {
             const newParticles = [];
+            const massRange = INITIAL_MAX_MASS - INITIAL_MIN_MASS;
             for (let i = 0; i < numParticles; i++) {
-              const mass = 1 + Math.random() * 3;
+              const mass = INITIAL_MIN_MASS + Math.random() * massRange;
               const angle = Math.random() * Math.PI * 2;
               newParticles.push({
                 id: i,
-                x: Math.random() * canvasWidth,
-                y: Math.random() * canvasHeight,
+                x: Math.random() * CANVAS_WIDTH,
+                y: Math.random() * CANVAS_HEIGHT,
                 vx: Math.cos(angle) * initialVelocity,
                 vy: Math.sin(angle) * initialVelocity,
                 mass: mass,
-                radius: Math.sqrt(mass) * 3,
+                radius: Math.sqrt(mass) * RADIUS_FACTOR,
                 alive: true
               });
             }
@@ -139,116 +176,211 @@
           const toggleSimulation = () => {
             setIsRunning(!isRunning);
           };
-          
-          // Fisica: calcola forze e aggiorna posizioni
-          const updatePhysics = (parts) => {
-            const dt = 0.016; // ~60 FPS
-            const newParticles = parts.filter(p => p.alive).map(p => ({...p}));
-            
-            // Calcola forze gravitazionali
-            for (let i = 0; i < newParticles.length; i++) {
-              if (!newParticles[i].alive) continue;
-              
-              let fx = 0, fy = 0;
-              
-              for (let j = 0; j < newParticles.length; j++) {
-                if (i === j || !newParticles[j].alive) continue;
-                
-                const dx = newParticles[j].x - newParticles[i].x;
-                const dy = newParticles[j].y - newParticles[i].y;
-                const distSq = dx * dx + dy * dy;
-                const dist = Math.sqrt(distSq);
-                
-                // Controlla collisione
-                if (dist < newParticles[i].radius + newParticles[j].radius) {
-                  // Fusione: la particella più grande assorbe la più piccola
-                  if (newParticles[i].mass >= newParticles[j].mass) {
-                    const totalMass = newParticles[i].mass + newParticles[j].mass;
-                    // Conservazione quantità di moto
-                    newParticles[i].vx = (newParticles[i].vx * newParticles[i].mass + newParticles[j].vx * newParticles[j].mass) / totalMass;
-                    newParticles[i].vy = (newParticles[i].vy * newParticles[i].mass + newParticles[j].vy * newParticles[j].mass) / totalMass;
-                    newParticles[i].mass = totalMass;
-                    newParticles[i].radius = Math.sqrt(newParticles[i].mass) * 3;
-                    newParticles[j].alive = false;
-                  } else {
-                    const totalMass = newParticles[i].mass + newParticles[j].mass;
-                    newParticles[j].vx = (newParticles[i].vx * newParticles[i].mass + newParticles[j].vx * newParticles[j].mass) / totalMass;
-                    newParticles[j].vy = (newParticles[i].vy * newParticles[i].mass + newParticles[j].vy * newParticles[j].mass) / totalMass;
-                    newParticles[j].mass = totalMass;
-                    newParticles[j].radius = Math.sqrt(newParticles[j].mass) * 3;
-                    newParticles[i].alive = false;
-                  }
-                  continue;
-                }
-                
-                // Forza gravitazionale: F = G * m1 * m2 / r^2
-                const force = gravitationalConstant * newParticles[i].mass * newParticles[j].mass / Math.max(distSq, 100);
-                fx += force * dx / dist;
-                fy += force * dy / dist;
-              }
-              
-              // Aggiorna velocità e posizione
-              if (newParticles[i].alive) {
-                newParticles[i].vx += (fx / newParticles[i].mass) * dt;
-                newParticles[i].vy += (fy / newParticles[i].mass) * dt;
-                newParticles[i].x += newParticles[i].vx * dt;
-                newParticles[i].y += newParticles[i].vy * dt;
-                
-                // Rimbalzo sui bordi
-                if (newParticles[i].x < newParticles[i].radius) {
-                  newParticles[i].x = newParticles[i].radius;
-                  newParticles[i].vx *= -0.8;
-                }
-                if (newParticles[i].x > canvasWidth - newParticles[i].radius) {
-                  newParticles[i].x = canvasWidth - newParticles[i].radius;
-                  newParticles[i].vx *= -0.8;
-                }
-                if (newParticles[i].y < newParticles[i].radius) {
-                  newParticles[i].y = newParticles[i].radius;
-                  newParticles[i].vy *= -0.8;
-                }
-                if (newParticles[i].y > canvasHeight - newParticles[i].radius) {
-                  newParticles[i].y = canvasHeight - newParticles[i].radius;
-                  newParticles[i].vy *= -0.8;
+
+          // ============ PHYSICS ============
+
+          const CELL_SIZE = 50; // Spatial grid cell size for collision detection
+
+          // Build spatial hash grid for efficient collision detection
+          const buildSpatialGrid = (particles) => {
+            const grid = new Map();
+            const cols = Math.ceil(CANVAS_WIDTH / CELL_SIZE);
+
+            particles.forEach((p, idx) => {
+              if (!p.alive) return;
+              const cellX = Math.floor(p.x / CELL_SIZE);
+              const cellY = Math.floor(p.y / CELL_SIZE);
+              const key = cellY * cols + cellX;
+
+              if (!grid.has(key)) grid.set(key, []);
+              grid.get(key).push(idx);
+            });
+
+            return { grid, cols };
+          };
+
+          // Get neighboring cell indices for collision checks
+          const getNeighborIndices = (x, y, cols, rows) => {
+            const neighbors = [];
+            for (let dy = -1; dy <= 1; dy++) {
+              for (let dx = -1; dx <= 1; dx++) {
+                const nx = x + dx;
+                const ny = y + dy;
+                if (nx >= 0 && nx < cols && ny >= 0 && ny < rows) {
+                  neighbors.push(ny * cols + nx);
                 }
               }
             }
-            
-            return newParticles.filter(p => p.alive);
+            return neighbors;
           };
+
+          // Calculate gravitational forces and update positions
+          const updatePhysics = useCallback((parts) => {
+            let particles = parts.filter(p => p.alive).map(p => ({...p}));
+            const newParticles = []; // For merged particles
+
+            // Build spatial grid for collision detection
+            const cols = Math.ceil(CANVAS_WIDTH / CELL_SIZE);
+            const rows = Math.ceil(CANVAS_HEIGHT / CELL_SIZE);
+            const { grid } = buildSpatialGrid(particles);
+
+            // Track which particles have been merged
+            const merged = new Set();
+
+            // Phase 1: Detect collisions using spatial hashing and create merged particles
+            for (let i = 0; i < particles.length; i++) {
+              if (!particles[i].alive || merged.has(i)) continue;
+
+              const pi = particles[i];
+              const cellX = Math.floor(pi.x / CELL_SIZE);
+              const cellY = Math.floor(pi.y / CELL_SIZE);
+              const neighborKeys = getNeighborIndices(cellX, cellY, cols, rows);
+
+              for (const key of neighborKeys) {
+                const cell = grid.get(key);
+                if (!cell) continue;
+
+                for (const j of cell) {
+                  if (i >= j || !particles[j].alive || merged.has(j)) continue;
+
+                  const pj = particles[j];
+                  const dx = pj.x - pi.x;
+                  const dy = pj.y - pi.y;
+                  const dist = Math.sqrt(dx * dx + dy * dy);
+
+                  // Check collision
+                  if (dist < pi.radius + pj.radius) {
+                    // Barycenter fusion: create new particle at center of mass
+                    const totalMass = pi.mass + pj.mass;
+
+                    // Position: mass-weighted barycenter
+                    const newX = (pi.x * pi.mass + pj.x * pj.mass) / totalMass;
+                    const newY = (pi.y * pi.mass + pj.y * pj.mass) / totalMass;
+
+                    // Velocity: momentum conservation
+                    const newVx = (pi.vx * pi.mass + pj.vx * pj.mass) / totalMass;
+                    const newVy = (pi.vy * pi.mass + pj.vy * pj.mass) / totalMass;
+
+                    // Create merged particle
+                    newParticles.push({
+                      id: `merged_${pi.id}_${pj.id}`,
+                      x: newX,
+                      y: newY,
+                      vx: newVx,
+                      vy: newVy,
+                      mass: totalMass,
+                      radius: Math.sqrt(totalMass) * RADIUS_FACTOR,
+                      alive: true
+                    });
+
+                    // Mark both as merged
+                    merged.add(i);
+                    merged.add(j);
+                    particles[i].alive = false;
+                    particles[j].alive = false;
+                    break; // Stop checking collisions for particle i
+                  }
+                }
+                if (merged.has(i)) break;
+              }
+            }
+
+            // Combine surviving particles with newly merged ones
+            const allParticles = [
+              ...particles.filter((p, idx) => p.alive && !merged.has(idx)),
+              ...newParticles
+            ];
+
+            // Phase 2: Calculate gravitational forces (O(n²) but with alive check)
+            const forces = allParticles.map(() => ({ fx: 0, fy: 0 }));
+
+            for (let i = 0; i < allParticles.length; i++) {
+              for (let j = i + 1; j < allParticles.length; j++) {
+                const pi = allParticles[i];
+                const pj = allParticles[j];
+
+                const dx = pj.x - pi.x;
+                const dy = pj.y - pi.y;
+                const distSq = dx * dx + dy * dy;
+                const dist = Math.sqrt(distSq);
+
+                // Gravitational force: F = G * m1 * m2 / r²
+                const force = gravitationalConstant * pi.mass * pj.mass / Math.max(distSq, MIN_DIST_SQ);
+                const fx = force * dx / dist;
+                const fy = force * dy / dist;
+
+                // Newton's third law: equal and opposite
+                forces[i].fx += fx;
+                forces[i].fy += fy;
+                forces[j].fx -= fx;
+                forces[j].fy -= fy;
+              }
+            }
+
+            // Phase 3: Update velocities and positions
+            for (let i = 0; i < allParticles.length; i++) {
+              const p = allParticles[i];
+
+              // Update velocity (F = ma, so a = F/m)
+              p.vx += (forces[i].fx / p.mass) * DT;
+              p.vy += (forces[i].fy / p.mass) * DT;
+
+              // Update position
+              p.x += p.vx * DT;
+              p.y += p.vy * DT;
+
+              // Bounce off walls
+              if (p.x < p.radius) {
+                p.x = p.radius;
+                p.vx *= -BOUNCE_DAMPING;
+              }
+              if (p.x > CANVAS_WIDTH - p.radius) {
+                p.x = CANVAS_WIDTH - p.radius;
+                p.vx *= -BOUNCE_DAMPING;
+              }
+              if (p.y < p.radius) {
+                p.y = p.radius;
+                p.vy *= -BOUNCE_DAMPING;
+              }
+              if (p.y > CANVAS_HEIGHT - p.radius) {
+                p.y = CANVAS_HEIGHT - p.radius;
+                p.vy *= -BOUNCE_DAMPING;
+              }
+            }
+
+            return allParticles;
+          }, [gravitationalConstant]);
           
+          // ============ EFFECTS ============
+
           // Rendering
           useEffect(() => {
             const canvas = canvasRef.current;
             if (!canvas) return;
-            
+
             const ctx = canvas.getContext('2d');
-            
-            const render = () => {
-              ctx.fillStyle = '#0a0a0a';
-              ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-              
-              particles.forEach(p => {
-                if (!p.alive) return;
-                ctx.fillStyle = massToColor(p.mass);
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                ctx.fill();
-              });
-            };
-            
-            render();
+            ctx.fillStyle = '#0a0a0a';
+            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+            // Only iterate over alive particles (already filtered by updatePhysics)
+            const aliveParticles = particles.filter(p => p.alive);
+            aliveParticles.forEach(p => {
+              ctx.fillStyle = massToColor(p.mass);
+              ctx.beginPath();
+              ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+              ctx.fill();
+            });
           }, [particles]);
-          
+
           // Animation loop
           useEffect(() => {
             if (!isRunning) return;
-            
+
             const animate = () => {
               setParticles(prevParticles => updatePhysics(prevParticles));
               animationRef.current = requestAnimationFrame(animate);
             };
-            
+
             animationRef.current = requestAnimationFrame(animate);
             
             return () => {
@@ -256,15 +388,17 @@
                 cancelAnimationFrame(animationRef.current);
               }
             };
-          }, [isRunning, gravitationalConstant]);
-          
-          // Inizializza al mount e quando cambiano i parametri
+          }, [isRunning, updatePhysics]);
+
+          // Initialize on mount and when parameters change
           useEffect(() => {
             if (!isRunning) {
               initializeParticles();
             }
           }, [numParticles, initialVelocity]);
-          
+
+          // ============ RENDER ============
+
           return (
             <div className="flex flex-col items-center gap-6 p-6 bg-gray-900 min-h-screen">
               {/* Language toggle */}
@@ -307,8 +441,8 @@
               {/* Canvas */}
               <canvas
                 ref={canvasRef}
-                width={canvasWidth}
-                height={canvasHeight}
+                width={CANVAS_WIDTH}
+                height={CANVAS_HEIGHT}
                 className="border-2 border-gray-700 rounded-lg shadow-2xl"
               />
               
@@ -328,7 +462,7 @@
                       value={numParticles}
                       onChange={(e) => setNumParticles(parseInt(e.target.value))}
                       disabled={isRunning}
-                      className="w-full"
+                      className="w-full disabled:cursor-not-allowed disabled:opacity-50"
                     />
                   </div>
                   
@@ -344,7 +478,7 @@
                       value={initialVelocity}
                       onChange={(e) => setInitialVelocity(parseFloat(e.target.value))}
                       disabled={isRunning}
-                      className="w-full"
+                      className="w-full disabled:cursor-not-allowed disabled:opacity-50"
                     />
                   </div>
                   
@@ -363,8 +497,8 @@
                     />
                   </div>
                 </div>
-                
-                <div className="flex gap-4 justify-center mb-4">
+
+                <div className="flex gap-4 justify-center mb-6">
                   <button
                     onClick={toggleSimulation}
                     className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition"
@@ -381,19 +515,22 @@
                 </div>
                 
                 <div className="text-gray-300 text-sm">
-                  <p><span className="font-bold">{t.activeParticles}:</span> {particles.filter(p => p.alive).length}</p>
+                  <p><span className="font-bold">{t.activeParticles}:</span> {particleStats.count}</p>
                 </div>
               </div>
-              
+
               {/* Color legend */}
               <div className="bg-gray-800 p-6 rounded-lg max-w-4xl w-full">
                 <h3 className="text-xl font-bold text-white mb-3">{t.legend}</h3>
                 <p className="text-gray-300 mb-3">{t.legendDesc}</p>
                 <div className="flex items-center gap-2">
+                  <span className="text-white text-sm font-mono">{particleStats.minMass.toFixed(1)}</span>
                   <div className="flex-1 h-8 rounded" style={{
                     background: 'linear-gradient(to right, hsl(0, 80%, 50%), hsl(30, 80%, 50%), hsl(60, 80%, 50%), hsl(120, 80%, 50%), hsl(210, 80%, 50%), hsl(270, 80%, 50%))'
                   }}></div>
+                  <span className="text-white text-sm font-mono">{particleStats.maxMass.toFixed(1)}</span>
                 </div>
+                <p className="text-gray-400 text-xs mt-2">{t.massRange}: {particleStats.minMass.toFixed(1)} - {particleStats.maxMass.toFixed(1)}</p>
               </div>
               
               {/* Key concepts */}

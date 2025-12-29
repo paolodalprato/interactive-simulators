@@ -57,10 +57,11 @@ This simulator helps you understand:
 ## 🔬 Key Features
 
 - **Realistic physics**: accurate implementation of universal gravitation law
+- **Barycenter fusion**: colliding particles merge at their center of mass, conserving momentum
 - **Mass visualization**: colors ranging from red (small mass) to violet (large mass)
-- **Momentum conservation**: collisions respect physical laws
+- **Dynamic color legend**: shows current mass range of active particles in real-time
 - **Emergent behavior**: complex structures emerge spontaneously
-- **Adjustable parameters**: full control over particle count, velocity, and gravity
+- **Adjustable parameters**: control particle count, initial velocity, and gravitational constant
 - **Bilingual**: available in Italian and English
 
 ## 📚 Educational Context
@@ -94,6 +95,7 @@ This simulator helps you understand:
 
 - **Technologies**: HTML5, React 18, Tailwind CSS, Canvas 2D
 - **Format**: Single self-contained HTML file
+- **Optimization**: Spatial hashing for efficient collision detection
 - **Requirements**: Modern browser (Chrome, Firefox, Safari, Edge)
 - **Mobile-friendly**: Optimized for desktop, viewable on mobile
 
