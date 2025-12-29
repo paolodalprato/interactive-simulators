@@ -1,272 +1,96 @@
 {
     "meta": {
-        "title": {
-            "en": "Project Management Basics",
-            "it": "Fondamenti di Project Management"
-        },
-        "description": {
-            "en": "Test your knowledge of project management fundamentals",
-            "it": "Verifica le tue conoscenze sui fondamenti del project management"
-        },
+        "title": "Project Management Basics",
+        "description": "Test your knowledge of project management fundamentals",
         "author": "Paolo Dalprato"
     },
     "translations": {
-        "en": {
-            "step": "Question",
-            "restart": "Try Again",
-            "endOfPath": "Quiz Complete",
-            "resources": "Learn More",
-            "viewMap": "View Progress",
-            "mapOf": "Progress Map:",
-            "back": "Previous",
-            "download": "Download",
-            "openLink": "Read",
-            "watchVideo": "Watch"
-        },
-        "it": {
-            "step": "Domanda",
-            "restart": "Riprova",
-            "endOfPath": "Quiz completato",
-            "resources": "Approfondimenti",
-            "viewMap": "Vedi progressi",
-            "mapOf": "Mappa progressi:",
-            "back": "Precedente",
-            "download": "Scarica",
-            "openLink": "Leggi",
-            "watchVideo": "Guarda"
-        }
+        "step": "Question",
+        "restart": "Try Again",
+        "endOfPath": "Quiz Complete",
+        "resources": "Learn More",
+        "viewMap": "View Progress",
+        "mapOf": "Progress Map:",
+        "back": "Previous",
+        "download": "Download",
+        "openLink": "Read",
+        "watchVideo": "Watch"
     },
     "startNode": "start",
     "nodes": {
         "start": {
-            "content": {
-                "en": "# Project Management Quiz\n\nWelcome! This quiz will test your understanding of project management basics.\n\n**Question 1 of 3**\n\nWhat is the primary purpose of a project charter?",
-                "it": "# Quiz sul Project Management\n\nBenvenuto! Questo quiz verificherà la tua comprensione dei fondamenti del project management.\n\n**Domanda 1 di 3**\n\nQual è lo scopo principale di un project charter?"
-            },
+            "content": "# Project Management Quiz\n\nWelcome! This quiz will test your understanding of project management basics.\n\n**Question 1 of 3**\n\nWhat is the primary purpose of a project charter?",
             "choices": [
-                {
-                    "text": {
-                        "en": "To formally authorize the project",
-                        "it": "Autorizzare formalmente il progetto"
-                    },
-                    "next": "q1_correct"
-                },
-                {
-                    "text": {
-                        "en": "To list all project tasks",
-                        "it": "Elencare tutte le attività del progetto"
-                    },
-                    "next": "q1_wrong_tasks"
-                },
-                {
-                    "text": {
-                        "en": "To define the project budget",
-                        "it": "Definire il budget del progetto"
-                    },
-                    "next": "q1_wrong_budget"
-                }
+                { "text": "To formally authorize the project", "next": "q1_correct" },
+                { "text": "To list all project tasks", "next": "q1_wrong_tasks" },
+                { "text": "To define the project budget", "next": "q1_wrong_budget" }
             ],
             "resources": []
         },
         "q1_correct": {
-            "content": {
-                "en": "# ✓ Correct!\n\nThe project charter formally authorizes the project and gives the project manager authority to use organizational resources.\n\n**Question 2 of 3**\n\nWhat does the \"triple constraint\" in project management refer to?",
-                "it": "# ✓ Corretto!\n\nIl project charter autorizza formalmente il progetto e conferisce al project manager l'autorità di utilizzare le risorse dell'organizzazione.\n\n**Domanda 2 di 3**\n\nA cosa si riferisce il \"triplo vincolo\" nel project management?"
-            },
+            "content": "# Correct!\n\nThe project charter formally authorizes the project and gives the project manager authority to use organizational resources.\n\n**Question 2 of 3**\n\nWhat does the \"triple constraint\" in project management refer to?",
             "choices": [
-                {
-                    "text": {
-                        "en": "Scope, Time, Cost",
-                        "it": "Ambito, Tempo, Costo"
-                    },
-                    "next": "q2_correct"
-                },
-                {
-                    "text": {
-                        "en": "People, Process, Technology",
-                        "it": "Persone, Processi, Tecnologia"
-                    },
-                    "next": "q2_wrong"
-                },
-                {
-                    "text": {
-                        "en": "Plan, Do, Check",
-                        "it": "Pianificare, Fare, Verificare"
-                    },
-                    "next": "q2_wrong"
-                }
+                { "text": "Scope, Time, Cost", "next": "q2_correct" },
+                { "text": "People, Process, Technology", "next": "q2_wrong" },
+                { "text": "Plan, Do, Check", "next": "q2_wrong" }
             ],
             "resources": []
         },
         "q1_wrong_tasks": {
-            "content": {
-                "en": "# ✗ Not quite\n\nListing project tasks is done in the **Work Breakdown Structure (WBS)**, not the charter.\n\nThe project charter's primary purpose is to **formally authorize the project** and give the project manager authority.\n\n**Question 2 of 3**\n\nWhat does the \"triple constraint\" in project management refer to?",
-                "it": "# ✗ Non esattamente\n\nL'elenco delle attività del progetto viene fatto nella **Work Breakdown Structure (WBS)**, non nel charter.\n\nLo scopo principale del project charter è **autorizzare formalmente il progetto** e conferire autorità al project manager.\n\n**Domanda 2 di 3**\n\nA cosa si riferisce il \"triplo vincolo\" nel project management?"
-            },
+            "content": "# Not quite\n\nListing project tasks is done in the **Work Breakdown Structure (WBS)**, not the charter.\n\nThe project charter's primary purpose is to **formally authorize the project** and give the project manager authority.\n\n**Question 2 of 3**\n\nWhat does the \"triple constraint\" in project management refer to?",
             "choices": [
-                {
-                    "text": {
-                        "en": "Scope, Time, Cost",
-                        "it": "Ambito, Tempo, Costo"
-                    },
-                    "next": "q2_correct"
-                },
-                {
-                    "text": {
-                        "en": "People, Process, Technology",
-                        "it": "Persone, Processi, Tecnologia"
-                    },
-                    "next": "q2_wrong"
-                },
-                {
-                    "text": {
-                        "en": "Plan, Do, Check",
-                        "it": "Pianificare, Fare, Verificare"
-                    },
-                    "next": "q2_wrong"
-                }
+                { "text": "Scope, Time, Cost", "next": "q2_correct" },
+                { "text": "People, Process, Technology", "next": "q2_wrong" },
+                { "text": "Plan, Do, Check", "next": "q2_wrong" }
             ],
             "resources": []
         },
         "q1_wrong_budget": {
-            "content": {
-                "en": "# ✗ Not quite\n\nWhile the charter may include a high-level budget estimate, detailed budget definition happens in the **project management plan**.\n\nThe project charter's primary purpose is to **formally authorize the project** and give the project manager authority.\n\n**Question 2 of 3**\n\nWhat does the \"triple constraint\" in project management refer to?",
-                "it": "# ✗ Non esattamente\n\nSebbene il charter possa includere una stima di budget ad alto livello, la definizione dettagliata del budget avviene nel **piano di project management**.\n\nLo scopo principale del project charter è **autorizzare formalmente il progetto** e conferire autorità al project manager.\n\n**Domanda 2 di 3**\n\nA cosa si riferisce il \"triplo vincolo\" nel project management?"
-            },
+            "content": "# Not quite\n\nWhile the charter may include a high-level budget estimate, detailed budget definition happens in the **project management plan**.\n\nThe project charter's primary purpose is to **formally authorize the project** and give the project manager authority.\n\n**Question 2 of 3**\n\nWhat does the \"triple constraint\" in project management refer to?",
             "choices": [
-                {
-                    "text": {
-                        "en": "Scope, Time, Cost",
-                        "it": "Ambito, Tempo, Costo"
-                    },
-                    "next": "q2_correct"
-                },
-                {
-                    "text": {
-                        "en": "People, Process, Technology",
-                        "it": "Persone, Processi, Tecnologia"
-                    },
-                    "next": "q2_wrong"
-                },
-                {
-                    "text": {
-                        "en": "Plan, Do, Check",
-                        "it": "Pianificare, Fare, Verificare"
-                    },
-                    "next": "q2_wrong"
-                }
+                { "text": "Scope, Time, Cost", "next": "q2_correct" },
+                { "text": "People, Process, Technology", "next": "q2_wrong" },
+                { "text": "Plan, Do, Check", "next": "q2_wrong" }
             ],
             "resources": []
         },
         "q2_correct": {
-            "content": {
-                "en": "# ✓ Correct!\n\nThe triple constraint (also called the \"iron triangle\") refers to **Scope, Time, and Cost**. Changes to one typically affect the others.\n\n**Question 3 of 3**\n\nWho is primarily responsible for managing stakeholder expectations?",
-                "it": "# ✓ Corretto!\n\nIl triplo vincolo (chiamato anche \"triangolo di ferro\") si riferisce ad **Ambito, Tempo e Costo**. Le modifiche a uno di questi influenzano tipicamente gli altri.\n\n**Domanda 3 di 3**\n\nChi è principalmente responsabile della gestione delle aspettative degli stakeholder?"
-            },
+            "content": "# Correct!\n\nThe triple constraint (also called the \"iron triangle\") refers to **Scope, Time, and Cost**. Changes to one typically affect the others.\n\n**Question 3 of 3**\n\nWho is primarily responsible for managing stakeholder expectations?",
             "choices": [
-                {
-                    "text": {
-                        "en": "The Project Manager",
-                        "it": "Il Project Manager"
-                    },
-                    "next": "q3_correct"
-                },
-                {
-                    "text": {
-                        "en": "The Project Sponsor",
-                        "it": "Lo Sponsor del progetto"
-                    },
-                    "next": "q3_wrong_sponsor"
-                },
-                {
-                    "text": {
-                        "en": "The Team Lead",
-                        "it": "Il Team Lead"
-                    },
-                    "next": "q3_wrong_lead"
-                }
+                { "text": "The Project Manager", "next": "q3_correct" },
+                { "text": "The Project Sponsor", "next": "q3_wrong_sponsor" },
+                { "text": "The Team Lead", "next": "q3_wrong_lead" }
             ],
             "resources": []
         },
         "q2_wrong": {
-            "content": {
-                "en": "# ✗ Not quite\n\nThe triple constraint (also called the \"iron triangle\") refers to **Scope, Time, and Cost** - the three key factors that constrain every project. Changes to one typically affect the others.\n\n**Question 3 of 3**\n\nWho is primarily responsible for managing stakeholder expectations?",
-                "it": "# ✗ Non esattamente\n\nIl triplo vincolo (chiamato anche \"triangolo di ferro\") si riferisce ad **Ambito, Tempo e Costo** - i tre fattori chiave che vincolano ogni progetto. Le modifiche a uno di questi influenzano tipicamente gli altri.\n\n**Domanda 3 di 3**\n\nChi è principalmente responsabile della gestione delle aspettative degli stakeholder?"
-            },
+            "content": "# Not quite\n\nThe triple constraint (also called the \"iron triangle\") refers to **Scope, Time, and Cost** - the three key factors that constrain every project. Changes to one typically affect the others.\n\n**Question 3 of 3**\n\nWho is primarily responsible for managing stakeholder expectations?",
             "choices": [
-                {
-                    "text": {
-                        "en": "The Project Manager",
-                        "it": "Il Project Manager"
-                    },
-                    "next": "q3_correct"
-                },
-                {
-                    "text": {
-                        "en": "The Project Sponsor",
-                        "it": "Lo Sponsor del progetto"
-                    },
-                    "next": "q3_wrong_sponsor"
-                },
-                {
-                    "text": {
-                        "en": "The Team Lead",
-                        "it": "Il Team Lead"
-                    },
-                    "next": "q3_wrong_lead"
-                }
+                { "text": "The Project Manager", "next": "q3_correct" },
+                { "text": "The Project Sponsor", "next": "q3_wrong_sponsor" },
+                { "text": "The Team Lead", "next": "q3_wrong_lead" }
             ],
             "resources": []
         },
         "q3_correct": {
-            "content": {
-                "en": "# ✓ Correct!\n\nThe **Project Manager** is primarily responsible for managing stakeholder expectations through regular communication, status updates, and stakeholder engagement activities.\n\n## 🎉 Quiz Complete!\n\nGreat job! You've demonstrated a solid understanding of project management fundamentals.",
-                "it": "# ✓ Corretto!\n\nIl **Project Manager** è principalmente responsabile della gestione delle aspettative degli stakeholder attraverso comunicazione regolare, aggiornamenti di stato e attività di coinvolgimento degli stakeholder.\n\n## 🎉 Quiz completato!\n\nOttimo lavoro! Hai dimostrato una solida comprensione dei fondamenti del project management."
-            },
+            "content": "# Correct!\n\nThe **Project Manager** is primarily responsible for managing stakeholder expectations through regular communication, status updates, and stakeholder engagement activities.\n\n## Quiz Complete!\n\nGreat job! You've demonstrated a solid understanding of project management fundamentals.",
             "choices": [],
             "resources": [
-                {
-                    "type": "link",
-                    "label": {
-                        "en": "PMBOK Guide Overview",
-                        "it": "Panoramica della guida PMBOK"
-                    },
-                    "url": "https://www.pmi.org/pmbok-guide-standards"
-                }
+                { "type": "link", "label": "PMBOK Guide Overview", "url": "https://www.pmi.org/pmbok-guide-standards" }
             ]
         },
         "q3_wrong_sponsor": {
-            "content": {
-                "en": "# ✗ Not quite\n\nWhile the **Project Sponsor** has influence with stakeholders, the day-to-day management of stakeholder expectations is the **Project Manager's** responsibility.\n\n## Quiz Complete\n\nYou've completed the quiz. Consider reviewing stakeholder management concepts.",
-                "it": "# ✗ Non esattamente\n\nSebbene lo **Sponsor del progetto** abbia influenza sugli stakeholder, la gestione quotidiana delle aspettative degli stakeholder è responsabilità del **Project Manager**.\n\n## Quiz completato\n\nHai completato il quiz. Considera di ripassare i concetti di stakeholder management."
-            },
+            "content": "# Not quite\n\nWhile the **Project Sponsor** has influence with stakeholders, the day-to-day management of stakeholder expectations is the **Project Manager's** responsibility.\n\n## Quiz Complete\n\nYou've completed the quiz. Consider reviewing stakeholder management concepts.",
             "choices": [],
             "resources": [
-                {
-                    "type": "link",
-                    "label": {
-                        "en": "Stakeholder Management Guide",
-                        "it": "Guida alla gestione degli stakeholder"
-                    },
-                    "url": "https://www.pmi.org/learning/library"
-                }
+                { "type": "link", "label": "Stakeholder Management Guide", "url": "https://www.pmi.org/learning/library" }
             ]
         },
         "q3_wrong_lead": {
-            "content": {
-                "en": "# ✗ Not quite\n\nThe **Team Lead** manages the team's work, but stakeholder expectations are managed by the **Project Manager** who has the broader organizational view.\n\n## Quiz Complete\n\nYou've completed the quiz. Consider reviewing stakeholder management concepts.",
-                "it": "# ✗ Non esattamente\n\nIl **Team Lead** gestisce il lavoro del team, ma le aspettative degli stakeholder sono gestite dal **Project Manager** che ha una visione organizzativa più ampia.\n\n## Quiz completato\n\nHai completato il quiz. Considera di ripassare i concetti di stakeholder management."
-            },
+            "content": "# Not quite\n\nThe **Team Lead** manages the team's work, but stakeholder expectations are managed by the **Project Manager** who has the broader organizational view.\n\n## Quiz Complete\n\nYou've completed the quiz. Consider reviewing stakeholder management concepts.",
             "choices": [],
             "resources": [
-                {
-                    "type": "link",
-                    "label": {
-                        "en": "Stakeholder Management Guide",
-                        "it": "Guida alla gestione degli stakeholder"
-                    },
-                    "url": "https://www.pmi.org/learning/library"
-                }
+                { "type": "link", "label": "Stakeholder Management Guide", "url": "https://www.pmi.org/learning/library" }
             ]
         }
     }

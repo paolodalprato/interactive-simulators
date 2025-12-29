@@ -145,35 +145,6 @@
             z-index: 100;
         }
         
-        .language-toggle {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            display: flex;
-            gap: 0.5rem;
-            z-index: 100;
-        }
-        
-        .language-toggle button {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: rgba(255, 255, 255, 0.6);
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .language-toggle button.active {
-            background: #6366f1;
-            color: white;
-            border-color: #6366f1;
-        }
-        
-        .language-toggle button:hover:not(.active) {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
         .map-button {
             position: fixed;
             bottom: 1rem;
@@ -413,6 +384,17 @@
         const { useState, useEffect } = React;
 
         // ============================================================
+        // Helper: Get text value (supports legacy language objects)
+        // ============================================================
+        const getText = (value) => {
+            if (typeof value === 'string') return value;
+            if (value && typeof value === 'object') {
+                return value[Object.keys(value)[0]] || '';
+            }
+            return '';
+        };
+
+        // ============================================================
         // Markdown Parser Component
         // ============================================================
         const MarkdownContent = ({ content }) => {
@@ -483,7 +465,7 @@
         // ============================================================
         // Tree Map Component
         // ============================================================
-        const TreeMap = ({ scenarioData, nodes, visitedNodes, currentNode, onNodeClick, language }) => {
+        const TreeMap = ({ scenarioData, nodes, visitedNodes, currentNode, onNodeClick }) => {
             const buildTreeLayout = () => {
                 const nodePositions = {};
                 const nodesByLevel = {};
@@ -565,7 +547,7 @@
                 const node = nodes[nodeId];
                 if (!node) return nodeId;
                 
-                const content = node.content[language] || node.content[Object.keys(node.content)[0]];
+                const content = getText(node.content);
                 const match = content.match(/^#\s+(.+)$/m);
                 if (match) {
                     const title = match[1].replace(/\*\*/g, '');
@@ -641,7 +623,6 @@
             const [visitedNodes, setVisitedNodes] = useState(new Set());
             const [choicesMade, setChoicesMade] = useState(new Map());
             const [path, setPath] = useState([]);
-            const [language, setLanguage] = useState('en');
             const [showMap, setShowMap] = useState(false);
             const [loading, setLoading] = useState(true);
             const [error, setError] = useState(null);
@@ -657,9 +638,8 @@
                     })
                     .then(configData => {
                         setConfig(configData);
-                        setLanguage(configData.defaultLanguage || 'en');
                         setScenarioFileName(configData.scenario);
-                        
+
                         return fetch(configData.scenario);
                     })
                     .then(response => {
@@ -685,7 +665,7 @@
                     });
             }, []);
             
-            const t = translations[language] || translations.en;
+            const t = translations || {};
             
             const handleChoice = (nextNode) => {
                 setChoicesMade(prev => {
@@ -730,7 +710,6 @@
             };
             
             const canGoBack = path.length > 1;
-            const isMultilingual = config?.languages?.length > 1;
             const showCredits = config?.showCredits !== false;
             
             if (loading) {
@@ -751,7 +730,7 @@
             const node = scenarioData.nodes[currentNode];
             if (!node) return <div className="error">Node not found: {currentNode}</div>;
             
-            const content = node.content[language] || node.content[Object.keys(node.content)[0]];
+            const content = getText(node.content);
             const choices = node.choices || [];
             const resources = node.resources || [];
             const isTerminal = choices.length === 0;
@@ -772,20 +751,6 @@
                             </button>
                         )}
                         
-                        {isMultilingual && (
-                            <div className="language-toggle">
-                                {config.languages.map(lang => (
-                                    <button 
-                                        key={lang}
-                                        className={language === lang ? 'active' : ''}
-                                        onClick={() => setLanguage(lang)}
-                                    >
-                                        {lang.toUpperCase()}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                        
                         <div className="progress-indicator">
                             {t.step} {currentStep} / {totalNodes}
                         </div>
@@ -800,7 +765,7 @@
                             {choices.length > 0 && (
                                 <div className="choices-container">
                                     {choices.map((choice, index) => {
-                                        const choiceText = choice.text[language] || choice.text[Object.keys(choice.text)[0]];
+                                        const choiceText = getText(choice.text);
                                         const isThisChoiceMade = previousChoice === choice.next;
                                         const isExplored = visitedNodes.has(choice.next) && !isThisChoiceMade;
                                         
@@ -827,7 +792,7 @@
                                 <div className="resources-section">
                                     <div className="resources-title">{t.resources}</div>
                                     {resources.map((resource, index) => {
-                                        const label = resource.label[language] || resource.label[Object.keys(resource.label)[0]];
+                                        const label = getText(resource.label);
                                         const icon = resource.type === 'download' ? '📥' : 
                                                      resource.type === 'video' ? '🎬' : '🔗';
                                         
@@ -871,7 +836,6 @@
                                     visitedNodes={visitedNodes}
                                     currentNode={currentNode}
                                     onNodeClick={handleNodeClick}
-                                    language={language}
                                 />
                             </div>
                         </div>

@@ -17,7 +17,7 @@ Interactive decision-tree framework for educational scenarios, training, and sto
 navigation-path/
 ├── branching-navigator.html    # Main navigator engine
 ├── scenario-editor.html        # Visual editor for scenarios
-├── config.json                 # Configuration (scenario, languages)
+├── config.json                 # Configuration (scenario file)
 ├── scenario-*.json             # Scenario data files
 ├── docs/                       # Downloadable resources
 └── images/                     # Screenshots for README
@@ -81,11 +81,17 @@ Use this format in HTML files:
 | Node list title | 30 | Full or truncated |
 | Node ID in tree | 14 | 12 + '..' |
 
-## Bilingual Support
+## Content Format
 
-- Primary language: first in `config.languages` array
-- Fallback: uses first available language in content object
-- Monolingual mode: `languages: ["en"]` shows single input fields
+All content uses plain strings (monolingual):
+
+```json
+{
+    "meta": { "title": "Scenario Title", "description": "..." },
+    "translations": { "step": "Step", "restart": "Start Over", ... },
+    "nodes": { "start": { "content": "# Welcome", "choices": [...] } }
+}
+```
 
 **⚠️ Required**: Every scenario JSON must have a complete `translations` section. Without it, navigation buttons will have no text. Required keys: `step`, `restart`, `endOfPath`, `resources`, `viewMap`, `mapOf`, `back`, `download`, `openLink`, `watchVideo`.
 
@@ -94,8 +100,6 @@ Use this format in HTML files:
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `scenario` | string | required | JSON file to load |
-| `languages` | array | `["en"]` | Available languages |
-| `defaultLanguage` | string | first in array | Initial language |
 | `showCredits` | boolean | `true` | Show author credits |
 
 ## Review Focus
@@ -104,7 +108,6 @@ When reviewing this project, check:
 
 - [ ] Button colors follow convention (destructive = red + uppercase)
 - [ ] Tree layout constants are consistent between files
-- [ ] All UI text has translations for configured languages
 - [ ] Section separators present in both HTML files
 - [ ] Credits visible in both navigator and editor
 - [ ] Scenario JSON files have complete `translations` section

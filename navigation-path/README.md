@@ -6,7 +6,7 @@ An interactive branching narrative framework for creating decision-tree based ex
 
 - **Interactive Decision Trees**: Create multi-path narratives where user choices shape the journey
 - **Visual Journey Map**: Real-time tree visualization showing visited paths and current position
-- **Bilingual Support**: Built-in English/Italian support (easily extensible to other languages)
+- **Simple JSON Format**: Plain strings for all content, no complex structures
 - **JSON-Based Content**: Easy-to-edit scenario files, no coding required for content changes
 - **Visual Scenario Editor**: Dedicated tool for creating and managing scenarios
 - **Resource Attachments**: Add downloads, links, and videos to any node
@@ -27,12 +27,12 @@ An interactive branching narrative framework for creating decision-tree based ex
 
 ```
 branching-navigator/
-├── config.json                 # Configuration (scenario file, languages)
+├── config.json                 # Configuration (scenario file)
 ├── branching-navigator.html    # Main navigator engine
 ├── scenario-editor.html        # Visual editor for creating scenarios
-├── scenario-quiz.json          # Example: bilingual quiz scenario
-├── scenario-workflow.json      # Example: monolingual workflow scenario
-├── scenario-sample.json        # Template: bilingual narrative (good starting point)
+├── scenario-quiz.json          # Example: quiz with correct/wrong feedback
+├── scenario-workflow.json      # Example: customer support escalation
+├── scenario-sample.json        # Template: narrative with multiple paths
 ├── start-navigator.bat         # Quick start for navigator (Windows)
 ├── start-editor.bat            # Quick start for editor (Windows)
 ├── README.md                   # This file
@@ -67,13 +67,11 @@ Upload all files to any web server or static hosting (GitHub Pages, Netlify, Ver
 
 ## ⚙️ Configuration
 
-The `config.json` file controls which scenario to load and available languages:
+The `config.json` file controls which scenario to load:
 
 ```json
 {
-    "scenario": "scenario-quiz.json",
-    "languages": ["en", "it"],
-    "defaultLanguage": "en",
+    "scenario": "scenario-sample.json",
     "showCredits": true
 }
 ```
@@ -81,8 +79,6 @@ The `config.json` file controls which scenario to load and available languages:
 | Field | Description |
 |-------|-------------|
 | `scenario` | JSON file containing the scenario data |
-| `languages` | Array of language codes. Use `["en", "it"]` for bilingual, `["en"]` for English only |
-| `defaultLanguage` | Initial language on load (optional, defaults to first in array) |
 | `showCredits` | Show author credits footer (optional, defaults to `true`) |
 
 To switch scenarios, simply change the `scenario` value and refresh.
@@ -104,19 +100,22 @@ http://localhost:8000/scenario-editor.html
 - **Visual Map View**: Interactive tree visualization of your scenario
 - **Inline Node Creation**: Create new nodes directly from the choice dropdown
 - **Choice Text Validation**: The editor requires button text when creating nodes (prevents invisible choices)
-- **Bilingual/Monolingual**: Automatically adapts to languages defined in `config.json`
+- **Live Preview**: Test your scenario directly from the editor
 - **Resource Management**: Add downloads, links, and videos to any node
 
 ### Workflow
 
 1. Start the local server and open the editor
 2. Click **New Scenario** or **Open File** to load an existing JSON
-3. Select a node from the sidebar to edit it
-4. Add choices with **+ Add Choice**
-5. Use **+ Create new node...** in the Target dropdown to create child nodes
-6. Click **Save** to download the updated JSON
-7. Copy the saved file to the project folder, replacing the old version
-8. Hard refresh (Ctrl+Shift+R) the navigator to see changes
+3. Click **Settings** to define scenario metadata (title, description, author)
+4. Select a node from the sidebar to edit it
+5. Add choices with **+ Add Choice**
+6. Enter the **Button Text** first, then select a target node or use **+ Create new node...** to create a child node
+7. Click **Save** to download the updated JSON
+8. Copy the saved file to the project folder, replacing the old version
+9. Hard refresh (Ctrl+Shift+R) the navigator to see changes
+
+> 💡 **Tip**: When creating a new node, enter the button text first. The popup only asks for Node ID and content — the button text is already set.
 
 ### ⚠️ Important: Node Deletion
 
@@ -130,29 +129,34 @@ When deleting a node that has child nodes connected to it:
 
 ## 📝 JSON Structure
 
-The scenario is defined in a simple JSON format:
+The scenario is defined in a simple JSON format with plain strings:
 
 ```json
 {
     "meta": {
-        "title": { "en": "Scenario Title", "it": "Titolo Scenario" },
-        "description": { "en": "Description", "it": "Descrizione" },
+        "title": "Scenario Title",
+        "description": "Description of the scenario",
         "author": "Author Name"
     },
     "translations": {
-        "en": { "step": "Step", "restart": "Start Over", ... },
-        "it": { "step": "Passo", "restart": "Ricomincia", ... }
+        "step": "Step",
+        "restart": "Start Over",
+        "endOfPath": "End of this path",
+        "resources": "Resources",
+        "viewMap": "View Map",
+        "mapOf": "Map of",
+        "back": "Back",
+        "download": "Download",
+        "openLink": "Open",
+        "watchVideo": "Watch"
     },
     "startNode": "start",
     "nodes": {
         "start": {
-            "content": {
-                "en": "# Welcome\n\nThis is **markdown** content.",
-                "it": "# Benvenuto\n\nQuesto è contenuto **markdown**."
-            },
+            "content": "# Welcome\n\nThis is **markdown** content.",
             "choices": [
-                { "text": { "en": "Option A", "it": "Opzione A" }, "next": "node_a" },
-                { "text": { "en": "Option B", "it": "Opzione B" }, "next": "node_b" }
+                { "text": "Option A", "next": "node_a" },
+                { "text": "Option B", "next": "node_b" }
             ],
             "resources": []
         }
@@ -160,11 +164,7 @@ The scenario is defined in a simple JSON format:
 }
 ```
 
-> ⚠️ **Required**: The `translations` section is mandatory. Without it, navigation buttons will have no text. Each language in `config.languages` must have a corresponding entry with all keys: `step`, `restart`, `endOfPath`, `resources`, `viewMap`, `mapOf`, `back`, `download`, `openLink`, `watchVideo`.
-
-### Monolingual Scenarios
-
-For single-language scenarios, set `"languages": ["en"]` in config.json. The editor will show single input fields instead of language pairs.
+> ⚠️ **Required**: The `translations` section is mandatory. Without it, navigation buttons will have no text.
 
 ### Supported Markdown
 
