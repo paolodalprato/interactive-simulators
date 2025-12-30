@@ -100,7 +100,7 @@ Suggestions, corrections, and new ideas are welcome! Open an issue or a pull req
 Each simulator is:
 - A single self-contained HTML file
 - Self-documented with README in its folder
-- Built following the [simulator-builder](https://github.com/paolodalprato/interactive-simulators/wiki) methodology
+- Built following a consistent simulator-builder methodology
 - Tested for accessibility and cross-browser compatibility
 
 For developers interested in creating similar simulators, see the individual README files for technical implementation details.

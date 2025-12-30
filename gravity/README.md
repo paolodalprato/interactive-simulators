@@ -2,6 +2,10 @@
 
 An interactive simulator to explore gravitational attraction between particles and observe the formation of complex structures from simple rules.
 
+## 📥 Download
+
+**[Download ZIP](https://github.com/paolodalprato/interactive-simulators/releases/latest/download/gravity-simulator.zip)** - Single HTML file, no installation required
+
 ## 🎯 What You'll Learn
 
 This simulator helps you understand:
