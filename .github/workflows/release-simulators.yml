@@ -19,7 +19,7 @@ jobs:
         run: |
           mkdir -p release-assets
 
-          # List of simulator directories (add new ones here)
+          # List of simulator directories (add new ones here) - MANDATORY
           SIMULATORS="heart digestion navigation-path gravity"
 
           for dir in $SIMULATORS; do
