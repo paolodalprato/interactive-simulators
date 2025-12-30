@@ -1,0 +1,58 @@
+name: Release Simulators
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create ZIP files for each simulator
+        run: |
+          mkdir -p release-assets
+
+          # List of simulator directories (add new ones here)
+          SIMULATORS="heart digestion navigation-path gravity"
+
+          for dir in $SIMULATORS; do
+            if [ -d "$dir" ]; then
+              echo "Creating ZIP for $dir..."
+              zip -r "release-assets/${dir}-simulator.zip" "$dir"
+            else
+              echo "Directory $dir not found, skipping..."
+            fi
+          done
+
+          ls -la release-assets/
+
+      - name: Delete existing release (if any)
+        run: |
+          gh release delete latest --yes || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create release with assets
+        run: |
+          gh release create latest \
+            --title "Latest Simulators" \
+            --notes "Download individual simulators as ZIP files.
+
+          **Available simulators:**
+          - 🫀 **heart-simulator.zip** - Interactive heart anatomy
+          - 🍽️ **digestion-simulator.zip** - Digestive system visualization
+          - 🧭 **navigation-path-simulator.zip** - Navigation path tool
+          - 🌍 **gravity-simulator.zip** - Gravity physics simulation
+
+          _Auto-generated on every push to main._" \
+            --latest \
+            release-assets/*.zip
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
