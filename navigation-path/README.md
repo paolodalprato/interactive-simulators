@@ -2,6 +2,10 @@
 
 An interactive branching narrative framework for creating decision-tree based experiences. Perfect for educational scenarios, corporate training, onboarding flows, and interactive storytelling.
 
+## 📥 Download
+
+**[Download ZIP](https://github.com/paolodalprato/interactive-simulators/releases/latest/download/navigation-path-simulator.zip)** - Complete package with navigator, editor, and sample scenarios
+
 ## ✨ Features
 
 - **Interactive Decision Trees**: Create multi-path narratives where user choices shape the journey

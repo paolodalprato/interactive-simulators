@@ -2,6 +2,10 @@
 
 An interactive educational simulator that visualizes how different foods travel through the human digestive system.
 
+## 📥 Download
+
+**[Download ZIP](https://github.com/paolodalprato/interactive-simulators/releases/latest/download/digestion-simulator.zip)** - Single HTML file, no installation required
+
 ## 🎯 What It Teaches
 
 This simulator helps users understand:

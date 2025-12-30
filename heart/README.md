@@ -2,6 +2,10 @@
 
 An interactive step-by-step visualization of how the human heart works.
 
+## 📥 Download
+
+**[Download ZIP](https://github.com/paolodalprato/interactive-simulators/releases/latest/download/heart-simulator.zip)** - Single HTML file, no installation required
+
 ## 🎯 What You'll Learn
 
 - The path of blood through the four chambers of the heart
