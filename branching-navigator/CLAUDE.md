@@ -14,7 +14,7 @@ Interactive decision-tree framework for educational scenarios, training, and sto
 ## File Structure
 
 ```
-navigation-path/
+branching-navigator/
 ├── branching-navigator.html    # Main navigator engine
 ├── scenario-editor.html        # Visual editor for scenarios
 ├── config.json                 # Configuration (scenario file)

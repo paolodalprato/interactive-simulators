@@ -19,8 +19,8 @@ jobs:
         run: |
           mkdir -p release-assets
 
-          # List of simulator directories (add new ones here) - MANDATORY
-          SIMULATORS="heart digestion navigation-path gravity"
+          # List of simulator directories (add new ones here)
+          SIMULATORS="heart digestion branching-navigator gravity"
 
           for dir in $SIMULATORS; do
             if [ -d "$dir" ]; then
@@ -48,7 +48,7 @@ jobs:
           **Available simulators:**
           - 🫀 **heart-simulator.zip** - Interactive heart anatomy
           - 🍽️ **digestion-simulator.zip** - Digestive system visualization
-          - 🧭 **navigation-path-simulator.zip** - Navigation path tool
+          - 🧭 **branching-navigator-simulator.zip** - Branching navigator tool
           - 🌍 **gravity-simulator.zip** - Gravity physics simulation
 
           _Auto-generated on every push to main._" \

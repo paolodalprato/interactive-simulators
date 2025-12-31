@@ -4,7 +4,7 @@ An interactive branching narrative framework for creating decision-tree based ex
 
 ## 📥 Download
 
-**[Download ZIP](https://github.com/paolodalprato/interactive-simulators/releases/latest/download/navigation-path-simulator.zip)** - Complete package with navigator, editor, and sample scenarios
+**[Download ZIP](https://github.com/paolodalprato/interactive-simulators/releases/latest/download/branching-navigator-simulator.zip)** - Complete package with navigator, editor, and sample scenarios
 
 ## ✨ Features
 
