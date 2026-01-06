@@ -19,7 +19,7 @@ Make learning more accessible through interactive visualizations that allow you 
 
 ## ✨ Common Features
 
-- **Bilingual**: English and Italian (English by default)
+- **Language support**: Each simulator handles languages independently (see individual READMEs)
 - **Interactive**: click, adjust parameters, and explore
 - **Educational**: designed with pedagogical principles
 - **Responsive**: works on desktop, tablet, and mobile
@@ -70,7 +70,7 @@ These simulators are designed for:
 Each simulator includes:
 - Clear learning objectives
 - Suggested usage scenarios
-- Bilingual support for accessibility
+- Language support for accessibility (varies by simulator)
 - Scientifically accurate content (within pedagogical simplifications)
 
 ## 📄 License
