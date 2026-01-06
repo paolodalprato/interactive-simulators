@@ -4,24 +4,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Digestive System Simulator</title>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <meta name="description" content="Interactive simulator showing how different foods travel through and are processed by the digestive system">
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @keyframes glow {
-            0%, 100% { filter: drop-shadow(0 0 3px currentColor); }
-            50% { filter: drop-shadow(0 0 8px currentColor); }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #0a0a0a;
         }
-        .active-organ {
-            animation: glow 1.5s ease-in-out infinite;
+        
+        .organ {
+            transition: all 0.3s ease;
         }
+        
+        .organ.active {
+            filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.5));
+        }
+        
         .pellet {
-            transition: cx 1s ease-in-out, cy 0.8s ease-in-out;
+            transition: all 0.5s ease;
+        }
+        
+        .absorb {
+            animation: absorb 1s ease-out forwards;
+        }
+        
+        @keyframes absorb {
+            0% { opacity: 1; transform: translateX(0); }
+            100% { opacity: 0; transform: translateX(30px); }
+        }
+        
+        .active-organ {
+            stroke-width: 4;
+            filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6));
+        }
+        
+        .exit-arrow {
+            animation: exitPulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes exitPulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
         }
     </style>
 </head>
-<body class="bg-gray-900 min-h-screen">
+<body>
     <div id="root"></div>
     
     <script type="text/babel">
@@ -31,34 +63,10 @@
         // DATA
         // ============================================
         
-        // Absorption probability thresholds (educational approximations)
-        // These values are simplified for visualization purposes:
-        // - In reality, absorption rates vary by individual, food combinations, and gut health
-        // - Water absorption is shown at ~50% in small intestine (rest in large intestine)
-        // - Other nutrients shown at ~70% to visualize that most absorption happens here
-        const ABSORPTION_RATES = {
-            WATER_IN_SMALL_INTESTINE: 0.5,    // 50% of water absorbed here, rest in large intestine
-            NUTRIENTS_IN_SMALL_INTESTINE: 0.7  // 70% of carbs/protein/fat absorbed
-        };
-
-        // Animation timing constants
-        const ANIMATION = {
-            CHEW_INTERVAL_MS: 400,      // Mouth chewing animation cycle (ms)
-            CHEW_OFFSET_PX: 8,          // Vertical displacement during chewing (px)
-            PELLET_MOVE_DELAY_MS: 600,  // Delay before absorption after pellet movement (ms)
-            TRANSITION_DURATION: '1s'   // CSS transition duration for pellet movement
-        };
-
-        // Grid layout for pellet positioning
-        const PELLET_GRID = {
-            COLUMNS: 4,      // Number of columns in pellet grid
-            SPACING_PX: 14   // Spacing between pellets (px)
-        };
-
         const foods = {
             water: {
                 id: 'water',
-                icon: '??',
+                icon: '💧',
                 nameEN: 'Water',
                 nameIT: 'Acqua',
                 phases: ['mouth', 'esophagus', 'stomach', 'small_intestine', 'complete'],
@@ -69,7 +77,7 @@
             },
             apple: {
                 id: 'apple',
-                icon: '??',
+                icon: '🍎',
                 nameEN: 'Apple',
                 nameIT: 'Mela',
                 phases: ['mouth', 'esophagus', 'stomach', 'small_intestine', 'large_intestine', 'complete'],
@@ -82,7 +90,7 @@
             },
             sandwich: {
                 id: 'sandwich',
-                icon: '??',
+                icon: '🥪',
                 nameEN: 'Sandwich',
                 nameIT: 'Sandwich',
                 phases: ['mouth', 'esophagus', 'stomach', 'small_intestine', 'large_intestine', 'complete'],
@@ -97,7 +105,7 @@
             },
             salad: {
                 id: 'salad',
-                icon: '??',
+                icon: '🥗',
                 nameEN: 'Salad',
                 nameIT: 'Insalata',
                 phases: ['mouth', 'esophagus', 'stomach', 'small_intestine', 'large_intestine', 'complete'],
@@ -110,7 +118,7 @@
             },
             cheese: {
                 id: 'cheese',
-                icon: '??',
+                icon: '🧀',
                 nameEN: 'Cheese',
                 nameIT: 'Formaggio',
                 phases: ['mouth', 'esophagus', 'stomach', 'small_intestine', 'large_intestine', 'complete'],
@@ -123,7 +131,7 @@
             },
             feast: {
                 id: 'feast',
-                icon: '???',
+                icon: '🍽️',
                 nameEN: 'Holiday Feast',
                 nameIT: 'Cenone',
                 phases: ['mouth', 'esophagus', 'stomach', 'small_intestine', 'large_intestine', 'complete'],
@@ -138,13 +146,12 @@
             }
         };
         
-        // Nutrient types with visual properties
         const pelletTypes = {
-            water: { color: '#3B82F6', nameEN: 'Water', nameIT: 'Acqua' },
-            carbs: { color: '#EAB308', nameEN: 'Carbohydrates', nameIT: 'Carboidrati' },
-            protein: { color: '#EF4444', nameEN: 'Proteins', nameIT: 'Proteine' },
-            fat: { color: '#F97316', nameEN: 'Fats', nameIT: 'Grassi' },
-            fiber: { color: '#22C55E', nameEN: 'Fiber', nameIT: 'Fibre' }
+            water: { color: '#3B82F6', nameEN: 'Water', nameIT: 'Acqua', speed: 1.5 },
+            carbs: { color: '#EAB308', nameEN: 'Carbohydrates', nameIT: 'Carboidrati', speed: 1.0 },
+            protein: { color: '#EF4444', nameEN: 'Proteins', nameIT: 'Proteine', speed: 0.7 },
+            fat: { color: '#F97316', nameEN: 'Fats', nameIT: 'Grassi', speed: 0.4 },
+            fiber: { color: '#22C55E', nameEN: 'Fiber', nameIT: 'Fibre', speed: 0.3 }
         };
         
         const phases = {
@@ -188,8 +195,8 @@
                     durationIT: '5-10 minuti',
                     actionEN: 'Rapid absorption into bloodstream',
                     actionIT: 'Assorbimento rapido nel flusso sanguigno',
-                    exitsEN: ['Water ? Blood ? Entire body'],
-                    exitsIT: ['Acqua ? Sangue ? Tutto il corpo']
+                    exitsEN: ['Water → Blood → Entire body'],
+                    exitsIT: ['Acqua → Sangue → Tutto il corpo']
                 },
                 complete: {
                     descEN: 'Water digestion is complete. Most water is now circulating in your blood, ready to hydrate cells throughout your body.',
@@ -226,8 +233,8 @@
                     durationIT: '2-3 ore',
                     actionEN: 'Sugar and water absorption',
                     actionIT: 'Assorbimento zuccheri e acqua',
-                    exitsEN: ['Sugars ? Blood ? Liver', 'Water ? Blood'],
-                    exitsIT: ['Zuccheri ? Sangue ? Fegato', 'Acqua ? Sangue']
+                    exitsEN: ['Sugars → Blood → Liver', 'Water → Blood'],
+                    exitsIT: ['Zuccheri → Sangue → Fegato', 'Acqua → Sangue']
                 },
                 large_intestine: {
                     descEN: 'Fiber arrives here mostly intact. Gut bacteria ferment it, producing short-chain fatty acids that nourish colon cells. Remaining water is reabsorbed.',
@@ -236,8 +243,8 @@
                     durationIT: '12-24 ore',
                     actionEN: 'Bacterial fermentation of fiber',
                     actionIT: 'Fermentazione batterica delle fibre',
-                    exitsEN: ['Water ? Blood', 'Short-chain fatty acids ? Colon cells'],
-                    exitsIT: ['Acqua ? Sangue', 'Acidi grassi a catena corta ? Cellule del colon']
+                    exitsEN: ['Water → Blood', 'Short-chain fatty acids → Colon cells'],
+                    exitsIT: ['Acqua → Sangue', 'Acidi grassi a catena corta → Cellule del colon']
                 },
                 complete: {
                     descEN: 'Apple digestion complete. Sugars were used for energy, water hydrated your body, and fiber fed your gut bacteria before being eliminated.',
@@ -274,8 +281,8 @@
                     durationIT: '3-5 ore',
                     actionEN: 'Complete breakdown and absorption',
                     actionIT: 'Scomposizione completa e assorbimento',
-                    exitsEN: ['Sugars + Amino acids ? Blood ? Liver', 'Fats ? Lymphatic system ? Blood'],
-                    exitsIT: ['Zuccheri + Aminoacidi ? Sangue ? Fegato', 'Grassi ? Sistema linfatico ? Sangue']
+                    exitsEN: ['Sugars + Amino acids → Blood → Liver', 'Fats → Lymphatic system → Blood'],
+                    exitsIT: ['Zuccheri + Aminoacidi → Sangue → Fegato', 'Grassi → Sistema linfatico → Sangue']
                 },
                 large_intestine: {
                     descEN: 'Fiber from bread and vegetables arrives here mostly intact. Water is reabsorbed into the bloodstream. Gut bacteria ferment the fiber, producing short-chain fatty acids. The material moves as a mass and is gradually compacted for elimination.',
@@ -284,8 +291,8 @@
                     durationIT: '12-36 ore',
                     actionEN: 'Water recovery, bacterial fermentation',
                     actionIT: 'Recupero acqua, fermentazione batterica',
-                    exitsEN: ['Water ? Blood'],
-                    exitsIT: ['Acqua ? Sangue']
+                    exitsEN: ['Water → Blood'],
+                    exitsIT: ['Acqua → Sangue']
                 },
                 complete: {
                     descEN: 'Sandwich digestion complete. Carbs provided quick energy, proteins supplied amino acids for muscles, and fats provided sustained energy and nutrient absorption.',
@@ -322,8 +329,8 @@
                     durationIT: '2-3 ore',
                     actionEN: 'Water and micronutrient absorption',
                     actionIT: 'Assorbimento acqua e micronutrienti',
-                    exitsEN: ['Water + Vitamins ? Blood'],
-                    exitsIT: ['Acqua + Vitamine ? Sangue']
+                    exitsEN: ['Water + Vitamins → Blood'],
+                    exitsIT: ['Acqua + Vitamine → Sangue']
                 },
                 large_intestine: {
                     descEN: 'This is where salad has its real impact. The abundant fiber feeds gut bacteria, promoting a healthy microbiome. Bacteria produce beneficial fatty acids. The bulk helps with regular bowel movements.',
@@ -332,8 +339,8 @@
                     durationIT: '18-36 ore',
                     actionEN: 'Fiber fermentation, promotes gut health',
                     actionIT: 'Fermentazione fibre, promuove salute intestinale',
-                    exitsEN: ['Water ? Blood', 'Short-chain fatty acids ? Colon cells'],
-                    exitsIT: ['Acqua ? Sangue', 'Acidi grassi a catena corta ? Cellule del colon']
+                    exitsEN: ['Water → Blood', 'Short-chain fatty acids → Colon cells'],
+                    exitsIT: ['Acqua → Sangue', 'Acidi grassi a catena corta → Cellule del colon']
                 },
                 complete: {
                     descEN: 'Salad digestion complete. Despite low calories, salad provided hydration, vitamins, and crucial fiber that supports gut health and regular digestion.',
@@ -370,8 +377,8 @@
                     durationIT: '3-5 ore',
                     actionEN: 'Intensive fat processing',
                     actionIT: 'Elaborazione intensiva dei grassi',
-                    exitsEN: ['Amino acids ? Blood ? Liver', 'Fats ? Lymphatic system ? Blood'],
-                    exitsIT: ['Aminoacidi ? Sangue ? Fegato', 'Grassi ? Sistema linfatico ? Sangue']
+                    exitsEN: ['Amino acids → Blood → Liver', 'Fats → Lymphatic system → Blood'],
+                    exitsIT: ['Aminoacidi → Sangue → Fegato', 'Grassi → Sistema linfatico → Sangue']
                 },
                 large_intestine: {
                     descEN: 'Very little reaches here from cheese - most nutrients have been absorbed. Any remaining undigested proteins or fats are processed by gut bacteria. Water is reabsorbed. Cheese typically produces minimal fecal residue.',
@@ -380,8 +387,8 @@
                     durationIT: '12-24 ore',
                     actionEN: 'Minimal residue processing',
                     actionIT: 'Elaborazione di residui minimi',
-                    exitsEN: ['Water ? Blood'],
-                    exitsIT: ['Acqua ? Sangue']
+                    exitsEN: ['Water → Blood'],
+                    exitsIT: ['Acqua → Sangue']
                 },
                 complete: {
                     descEN: 'Cheese digestion complete. The high fat and protein content provided sustained energy and essential amino acids, but required significant digestive effort and time.',
@@ -405,7 +412,7 @@
                 },
                 stomach: {
                     descEN: 'The stomach is working at maximum capacity. High fat content (butter, oil, fatty meats) dramatically slows emptying. Proteins require extensive processing. You may feel "stuffed" for hours.',
-                    descIT: 'Lo stomaco lavora a pieno regime. L\'alto contenuto di grassi (burro, olio, carni grasse) rallenta drasticamente lo svuotamento. Le proteine richiedono elaborazione estesa. Potresti sentirti pieno per ore.',
+                    descIT: 'Lo stomaco lavora a pieno regime. L\'alto contenuto di grassi (burro, olio, carni grasse) rallenta drasticamente lo svuotamento. Le proteine richiedono elaborazione estesa. Potresti sentirti «pieno» per ore.',
                     durationEN: '4-6 hours',
                     durationIT: '4-6 ore',
                     actionEN: 'Overloaded! Fats slow everything significantly',
@@ -418,8 +425,8 @@
                     durationIT: '5-8 ore',
                     actionEN: 'Maximum absorption activity',
                     actionIT: 'Massima attività di assorbimento',
-                    exitsEN: ['Sugars + Amino acids ? Blood ? Liver (working hard!)', 'Fats ? Lymphatic system ? Blood', 'Excess may be stored as fat'],
-                    exitsIT: ['Zuccheri + Aminoacidi ? Sangue ? Fegato (lavora duro!)', 'Grassi ? Sistema linfatico ? Sangue', 'L\'eccesso può essere immagazzinato come grasso']
+                    exitsEN: ['Sugars + Amino acids → Blood → Liver (working hard!)', 'Fats → Lymphatic system → Blood', 'Excess may be stored as fat'],
+                    exitsIT: ['Zuccheri + Aminoacidi → Sangue → Fegato (lavora duro!)', 'Grassi → Sistema linfatico → Sangue', 'L\'eccesso può essere immagazzinato come grasso']
                 },
                 large_intestine: {
                     descEN: 'After the feast, a significant mass of material arrives here. Water reabsorption is crucial. Gut bacteria work on the remaining fiber. The large volume means longer transit time as the material moves through as a mass, contributing to the prolonged feeling of fullness.',
@@ -428,8 +435,8 @@
                     durationIT: '24-48 ore',
                     actionEN: 'Extended processing of large volume',
                     actionIT: 'Elaborazione prolungata di grande volume',
-                    exitsEN: ['Water ? Blood'],
-                    exitsIT: ['Acqua ? Sangue']
+                    exitsEN: ['Water → Blood'],
+                    exitsIT: ['Acqua → Sangue']
                 },
                 complete: {
                     descEN: 'Feast digestion finally complete! Your body processed enormous amounts of carbs, proteins, and fats. Excess calories have been stored. This is why post-holiday walks help!',
@@ -441,41 +448,37 @@
         const texts = {
             en: {
                 title: 'Digestive System Simulator',
-                subtitle: 'Follow food through the digestive tract',
                 selectFood: 'Select food',
                 phase: 'Phase',
                 of: 'of',
-                next: 'Next Phase ?',
+                next: 'Next Phase →',
                 restart: 'Restart',
                 legend: 'Legend',
-                currentPhase: 'Current phase',
                 duration: 'Duration',
                 action: 'What happens',
                 exits: 'Nutrients exit to',
-                totalTime: 'Total digestion time',
+                totalTime: 'Total time',
                 complete: 'Digestion complete!',
                 tryAnother: 'Try another food',
                 credits: 'Created by',
-                note: 'Note: This is a simplified educational model. Actual digestion times vary based on individual factors and food combinations.'
+                note: 'Note: This is a simplified educational model. Actual digestion times vary based on individual factors.'
             },
             it: {
-                title: 'Simulatore dell\'apparato digerente',
-                subtitle: 'Segui il cibo attraverso il tratto digestivo',
+                title: 'Simulatore apparato digerente',
                 selectFood: 'Seleziona cibo',
                 phase: 'Fase',
                 of: 'di',
-                next: 'Fase successiva ?',
+                next: 'Fase successiva →',
                 restart: 'Ricomincia',
                 legend: 'Legenda',
-                currentPhase: 'Fase attuale',
                 duration: 'Durata',
                 action: 'Cosa succede',
                 exits: 'I nutrienti escono verso',
-                totalTime: 'Tempo totale digestione',
+                totalTime: 'Tempo totale',
                 complete: 'Digestione completata!',
                 tryAnother: 'Prova un altro cibo',
                 credits: 'Creato da',
-                note: 'Nota: Questo è un modello educativo semplificato. I tempi reali di digestione variano in base a fattori individuali e combinazioni di cibi.'
+                note: 'Nota: Questo è un modello educativo semplificato. I tempi reali di digestione variano in base a fattori individuali.'
             }
         };
         
@@ -483,17 +486,12 @@
         // PELLET COMPONENT
         // ============================================
         
-        const Pellet = ({ x, y, type, absorbed, size = 8, exitDirection }) => {
+        const Pellet = ({ x, y, type, absorbed, size = 5, exitDirection }) => {
             const pelletInfo = pelletTypes[type];
             
-            // Calculate exit position - move far enough to exit viewBox
             let finalX = x;
-            if (absorbed && exitDirection) {
-                if (exitDirection === 'right') {
-                    finalX = 500; // Exit right side of viewBox (450 wide)
-                } else if (exitDirection === 'left') {
-                    finalX = -50; // Exit left side of viewBox
-                }
+            if (absorbed && exitDirection === 'right') {
+                finalX = 500;
             }
             
             return (
@@ -503,18 +501,21 @@
                     r={size}
                     fill={pelletInfo.color}
                     className="pellet"
+                    style={{
+                        opacity: absorbed ? 0 : 1,
+                        transition: 'all 0.8s ease'
+                    }}
                 />
             );
         };
         
         // ============================================
-        // DIGESTIVE TRACT SVG
+        // DIGESTIVE TRACT SVG - COMPACTED VERSION
         // ============================================
         
         const DigestiveTract = ({ currentPhase, pellets, food, language, chewFrame }) => {
             const phaseIndex = food ? food.phases.indexOf(currentPhase) : -1;
             
-            // Determine which organs are active (current or past)
             const isActive = (phase) => {
                 if (!food) return false;
                 const idx = food.phases.indexOf(phase);
@@ -523,11 +524,10 @@
             
             const isCurrent = (phase) => phase === currentPhase;
             
-            // Chewing animation offset
-            const chewOffset = chewFrame ? ANIMATION.CHEW_OFFSET_PX : 0;
+            const chewOffset = chewFrame ? 8 : 0;
             
             return (
-                <svg viewBox="0 0 450 730" className="w-full max-w-md mx-auto">
+                <svg viewBox="0 0 450 620" className="w-full max-w-md mx-auto">
                     <defs>
                         <linearGradient id="acidGradient" x1="0%" y1="0%" x2="0%" y2="100%">
                             <stop offset="0%" stopColor="#FDE047" stopOpacity="0.3" />
@@ -536,11 +536,10 @@
                     </defs>
                     
                     {/* Background */}
-                    <rect x="0" y="0" width="450" height="730" fill="#1a1a2e" rx="10" />
+                    <rect x="0" y="0" width="450" height="620" fill="#1a1a2e" rx="10" />
                     
                     {/* === MOUTH === */}
                     <g className="organ">
-                        {/* Mouth as a sack - always keeps its shape, top and bottom move for chewing */}
                         <path
                             d={`M100 ${35 + chewOffset} 
                                 Q90 ${35 + chewOffset} 90 50 
@@ -554,17 +553,15 @@
                             strokeWidth={isCurrent('mouth') ? 4 : 0}
                             className={isCurrent('mouth') ? 'active-organ' : ''}
                         />
-                        {/* External opening (left) - always visible */}
                         <ellipse cx="90" cy="50" rx="6" ry="12" fill="#1a1a2e" />
-                        {/* Label outside */}
                         <text x="50" y="55" textAnchor="end" fill={isCurrent('mouth') ? '#3B82F6' : '#9CA3AF'} fontSize="11" fontWeight={isCurrent('mouth') ? 'bold' : 'normal'}>
                             {language === 'it' ? 'BOCCA' : 'MOUTH'}
                         </text>
                     </g>
                     
-                    {/* Connection mouth to esophagus (90° curve) */}
+                    {/* Connection mouth to esophagus */}
                     <path
-                        d="M200 50 Q240 50 240 90 L240 120"
+                        d="M200 50 Q240 50 240 90"
                         fill="none"
                         stroke={isActive('esophagus') ? '#F87171' : '#4B5563'}
                         strokeWidth="20"
@@ -572,18 +569,17 @@
                     
                     {/* === ESOPHAGUS === */}
                     <g className="organ">
-                        {/* Extended to connect with stomach (y=120 to y=235) */}
                         <rect
                             x="230"
-                            y="120"
+                            y="90"
                             width="20"
-                            height="115"
+                            height="70"
                             fill={isActive('esophagus') ? '#F87171' : '#4B5563'}
                             stroke={isCurrent('esophagus') ? '#3B82F6' : 'none'}
                             strokeWidth={isCurrent('esophagus') ? 4 : 0}
                             className={isCurrent('esophagus') ? 'active-organ' : ''}
                         />
-                        <text x="270" y="180" fill={isCurrent('esophagus') ? '#3B82F6' : '#9CA3AF'} fontSize="11" fontWeight={isCurrent('esophagus') ? 'bold' : 'normal'}>
+                        <text x="270" y="130" fill={isCurrent('esophagus') ? '#3B82F6' : '#9CA3AF'} fontSize="11" fontWeight={isCurrent('esophagus') ? 'bold' : 'normal'}>
                             {language === 'it' ? 'ESOFAGO' : 'ESOPHAGUS'}
                         </text>
                     </g>
@@ -592,41 +588,32 @@
                     <g className="organ">
                         <ellipse
                             cx="240"
-                            cy="300"
+                            cy="220"
                             rx="55"
-                            ry="65"
+                            ry="60"
                             fill={isActive('stomach') ? 'url(#acidGradient)' : '#4B5563'}
                             stroke={isCurrent('stomach') ? '#3B82F6' : 'none'}
                             strokeWidth={isCurrent('stomach') ? 4 : 0}
                             className={isCurrent('stomach') ? 'active-organ' : ''}
                         />
-                        {/* Labels outside stomach */}
-                        <text x="320" y="290" fill={isCurrent('stomach') ? '#3B82F6' : '#9CA3AF'} fontSize="11" fontWeight={isCurrent('stomach') ? 'bold' : 'normal'}>
+                        <text x="320" y="210" fill={isCurrent('stomach') ? '#3B82F6' : '#9CA3AF'} fontSize="11" fontWeight={isCurrent('stomach') ? 'bold' : 'normal'}>
                             {language === 'it' ? 'STOMACO' : 'STOMACH'}
                         </text>
                         {isCurrent('stomach') && (
-                            <text x="320" y="305" fill="#FDE047" fontSize="10">
+                            <text x="320" y="225" fill="#FDE047" fontSize="10">
                                 pH 1.5-3.5
                             </text>
                         )}
                     </g>
                     
-                    {/* Connection stomach to small intestine */}
-                    <path
-                        d="M240 365 L240 385"
-                        stroke={isActive('small_intestine') ? '#FB923C' : '#4B5563'}
-                        strokeWidth="20"
-                    />
-                    
                     {/* === SMALL INTESTINE === */}
                     <g className="organ">
-                        {/* Wavy tube representing small intestine */}
                         <path
-                            d="M240 385 
-                               Q180 410 180 450 
-                               Q180 490 240 490 
-                               Q300 490 300 530 
-                               Q300 570 240 570"
+                            d="M240 280 
+                               Q180 305 180 340 
+                               Q180 375 240 375 
+                               Q300 375 300 410 
+                               Q300 445 240 445"
                             fill="none"
                             stroke={isActive('small_intestine') ? '#FB923C' : '#4B5563'}
                             strokeWidth="24"
@@ -634,7 +621,7 @@
                         />
                         {isCurrent('small_intestine') && (
                             <path
-                                d="M240 385 Q180 410 180 450 Q180 490 240 490 Q300 490 300 530 Q300 570 240 570"
+                                d="M240 280 Q180 305 180 340 Q180 375 240 375 Q300 375 300 410 Q300 445 240 445"
                                 fill="none"
                                 stroke="#3B82F6"
                                 strokeWidth="30"
@@ -643,45 +630,36 @@
                             />
                         )}
                         
-                        {/* Label for small intestine - positioned to the right in upper concave area */}
-                        <text x="320" y="420" fill={isCurrent('small_intestine') ? '#3B82F6' : '#9CA3AF'} fontSize="10" fontWeight={isCurrent('small_intestine') ? 'bold' : 'normal'}>
+                        <text x="320" y="315" fill={isCurrent('small_intestine') ? '#3B82F6' : '#9CA3AF'} fontSize="10" fontWeight={isCurrent('small_intestine') ? 'bold' : 'normal'}>
                             {language === 'it' ? 'INTESTINO' : 'SMALL'}
                         </text>
-                        <text x="320" y="435" fill={isCurrent('small_intestine') ? '#3B82F6' : '#9CA3AF'} fontSize="10" fontWeight={isCurrent('small_intestine') ? 'bold' : 'normal'}>
+                        <text x="320" y="330" fill={isCurrent('small_intestine') ? '#3B82F6' : '#9CA3AF'} fontSize="10" fontWeight={isCurrent('small_intestine') ? 'bold' : 'normal'}>
                             {language === 'it' ? 'TENUE' : 'INTESTINE'}
                         </text>
                         
-                        {/* Input arrow for bile - on the left side */}
                         {isCurrent('small_intestine') && (
                             <g className="input-arrow">
-                                <path d="M130 450 L165 450" stroke="#84CC16" strokeWidth="2" markerEnd="url(#arrowLime)" />
-                                <text x="80" y="445" fill="#84CC16" fontSize="9">
+                                <path d="M130 340 L165 340" stroke="#84CC16" strokeWidth="2" markerEnd="url(#arrowLime)" />
+                                <text x="80" y="335" fill="#84CC16" fontSize="9">
                                     {language === 'it' ? 'Bile' : 'Bile'}
                                 </text>
-                                <text x="80" y="460" fill="#84CC16" fontSize="9">
+                                <text x="80" y="350" fill="#84CC16" fontSize="9">
                                     {language === 'it' ? '(dal fegato)' : '(from liver)'}
                                 </text>
                             </g>
                         )}
                         
-                        {/* Exit arrows for small intestine - positioned to the right */}
                         {isCurrent('small_intestine') && (
                             <g className="exit-arrow">
-                                {/* Blood arrow - always visible */}
-                                <text x="340" y="478" fill="#22C55E" fontSize="9" textAnchor="middle">
-                                    {language === 'it' ? 'Sangue ? Fegato' : 'Blood ? Liver'}
+                                <path d="M320 375 L370 375" stroke="#22C55E" strokeWidth="2" markerEnd="url(#arrowGreen)" />
+                                <text x="375" y="370" fill="#22C55E" fontSize="9">
+                                    {language === 'it' ? 'Sangue → Fegato' : 'Blood → Liver'}
                                 </text>
-                                <path d="M320 490 L370 490" stroke="#22C55E" strokeWidth="2" markerEnd="url(#arrowGreen)" />
                                 
-                                {/* Lymphatic arrow - only visible when food contains fats */}
-                                {food && food.pellets.some(p => p.type === 'fat') && (
-                                    <g>
-                                        <path d="M320 530 L370 530" stroke="#F97316" strokeWidth="2" markerEnd="url(#arrowOrange)" />
-                                        <text x="355" y="548" fill="#F97316" fontSize="9" textAnchor="middle">
-                                            {language === 'it' ? 'Sist. linfatico (grassi)' : 'Lymphatic sys. (fats)'}
-                                        </text>
-                                    </g>
-                                )}
+                                <path d="M320 410 L370 410" stroke="#F97316" strokeWidth="2" markerEnd="url(#arrowOrange)" />
+                                <text x="375" y="415" fill="#F97316" fontSize="9">
+                                    {language === 'it' ? 'Sist. linfatico (grassi)' : 'Lymphatic sys. (fats)'}
+                                </text>
                             </g>
                         )}
                     </g>
@@ -704,25 +682,23 @@
                     
                     {/* === LARGE INTESTINE === */}
                     <g className="organ">
-                        {/* U-shaped large intestine - tube style like small intestine */}
                         <path
-                            d="M240 570 
-                               L120 570 
-                               Q90 570 90 600 
-                               L90 670 
-                               Q90 700 120 700 
-                               L340 700 
-                               Q370 700 370 670 
-                               L370 640"
+                            d="M240 445 
+                               L120 445 
+                               Q90 445 90 475 
+                               L90 535 
+                               Q90 565 120 565 
+                               L340 565 
+                               Q370 565 370 535 
+                               L370 510"
                             fill="none"
                             stroke={isActive('large_intestine') ? '#A78BFA' : '#4B5563'}
                             strokeWidth="24"
                             strokeLinecap="round"
                         />
-                        {/* Highlight glow - same pattern as small intestine */}
                         {isCurrent('large_intestine') && (
                             <path
-                                d="M240 570 L120 570 Q90 570 90 600 L90 670 Q90 700 120 700 L340 700 Q370 700 370 670 L370 640"
+                                d="M240 445 L120 445 Q90 445 90 475 L90 535 Q90 565 120 565 L340 565 Q370 565 370 535 L370 510"
                                 fill="none"
                                 stroke="#3B82F6"
                                 strokeWidth="30"
@@ -731,20 +707,18 @@
                             />
                         )}
                         
-                        {/* Label for large intestine */}
-                        <text x="230" y="725" textAnchor="middle" fill={isCurrent('large_intestine') ? '#3B82F6' : '#9CA3AF'} fontSize="10" fontWeight={isCurrent('large_intestine') ? 'bold' : 'normal'}>
+                        <text x="230" y="600" textAnchor="middle" fill={isCurrent('large_intestine') ? '#3B82F6' : '#9CA3AF'} fontSize="10" fontWeight={isCurrent('large_intestine') ? 'bold' : 'normal'}>
                             {language === 'it' ? 'INTESTINO CRASSO' : 'LARGE INTESTINE'}
                         </text>
                         
-                        {/* Exit arrow for water reabsorption - on the right side */}
                         {isCurrent('large_intestine') && (
                             <g className="exit-arrow">
-                                <path d="M385 670 L420 670" stroke="#3B82F6" strokeWidth="2" markerEnd="url(#arrowBlue)" />
-                                <text x="390" y="660" fill="#3B82F6" fontSize="9">
+                                <path d="M385 535 L420 535" stroke="#3B82F6" strokeWidth="2" markerEnd="url(#arrowBlue)" />
+                                <text x="390" y="525" fill="#3B82F6" fontSize="9">
                                     {language === 'it' ? 'Acqua' : 'Water'}
                                 </text>
-                                <text x="390" y="685" fill="#3B82F6" fontSize="9">
-                                    ? {language === 'it' ? 'Sangue' : 'Blood'}
+                                <text x="390" y="550" fill="#3B82F6" fontSize="9">
+                                    → {language === 'it' ? 'Sangue' : 'Blood'}
                                 </text>
                             </g>
                         )}
@@ -752,21 +726,21 @@
                     
                     {/* === EXIT === */}
                     <g>
-                        <rect x="360" y="625" width="20" height="30" fill="#4B5563" rx="3" />
-                        <text x="395" y="645" fill="#6B7280" fontSize="9">
+                        <rect x="360" y="495" width="20" height="30" fill="#4B5563" rx="3" />
+                        <text x="395" y="515" fill="#6B7280" fontSize="9">
                             {language === 'it' ? 'Uscita' : 'Exit'}
                         </text>
                     </g>
                     
                     {/* === PELLETS === */}
-                    {pellets.map((pellet) => (
+                    {pellets.map((pellet, index) => (
                         <Pellet
-                            key={pellet.id}
+                            key={index}
                             x={pellet.x}
                             y={pellet.y}
                             type={pellet.type}
                             absorbed={pellet.absorbed}
-                            size={pellet.size || 6}
+                            size={pellet.size || 5}
                             exitDirection={pellet.exitDirection}
                         />
                     ))}
@@ -775,7 +749,7 @@
         };
         
         // ============================================
-        // MAIN SIMULATOR COMPONENT
+        // MAIN COMPONENT
         // ============================================
         
         const DigestiveSimulator = () => {
@@ -784,72 +758,61 @@
             const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
             const [pellets, setPellets] = useState([]);
             const [chewFrame, setChewFrame] = useState(false);
+            const animationRef = useRef(null);
             
             const t = texts[language];
             const currentPhase = selectedFood ? selectedFood.phases[currentPhaseIndex] : null;
+            const phaseName = currentPhase ? phases[currentPhase] : null;
+            
+            const getPhaseInfo = () => {
+                if (!selectedFood || !currentPhase) return null;
+                const foodDescriptions = phaseDescriptions[selectedFood.id];
+                if (!foodDescriptions) return null;
+                return foodDescriptions[currentPhase];
+            };
+            
+            const phaseInfo = getPhaseInfo();
             
             // Chewing animation
             useEffect(() => {
-                if (currentPhase === 'mouth' && selectedFood && selectedFood.id !== 'water') {
+                if (currentPhase === 'mouth') {
                     const interval = setInterval(() => {
                         setChewFrame(prev => !prev);
-                    }, ANIMATION.CHEW_INTERVAL_MS);
+                    }, 400);
                     return () => clearInterval(interval);
                 }
-            }, [currentPhase, selectedFood]);
+            }, [currentPhase]);
             
-            // Initialize pellets for a food
+            // Initialize pellets
             const initializePellets = (food) => {
                 const newPellets = [];
                 let offsetX = 0;
-                const typeCounters = {}; // Track count per type for unique IDs
-
-                food.pellets.forEach(pelletDef => {
-                    for (let i = 0; i < pelletDef.count; i++) {
-                        // Grid layout in mouth
-                        const col = offsetX % PELLET_GRID.COLUMNS;
-                        const row = Math.floor(offsetX / PELLET_GRID.COLUMNS);
-
-                        // Generate unique ID: type_index (e.g., water_0, carbs_1)
-                        typeCounters[pelletDef.type] = (typeCounters[pelletDef.type] || 0);
-                        const pelletId = `${pelletDef.type}_${typeCounters[pelletDef.type]++}`;
-
+                
+                food.pellets.forEach(pelletGroup => {
+                    for (let i = 0; i < pelletGroup.count; i++) {
                         newPellets.push({
-                            id: pelletId,
-                            type: pelletDef.type,
-                            x: 120 + col * PELLET_GRID.SPACING_PX,
-                            y: 42 + row * PELLET_GRID.SPACING_PX,
+                            type: pelletGroup.type,
+                            x: 120 + (offsetX % 5) * 14,
+                            y: 45 + Math.floor(offsetX / 5) * 10,
                             absorbed: false,
-                            size: 6
+                            size: 5
                         });
                         offsetX++;
                     }
                 });
-
+                
                 return newPellets;
             };
             
-            // Move pellets to phase position
+            // Move pellets
             const movePelletsToPhase = (phase, currentPellets) => {
-                // ============================================================
-                // ⚠️  SYNC REQUIRED: SVG ↔ PELLET POSITIONS
-                // ============================================================
-                // These coordinates MUST match the organ positions in DigestiveTract.
-                // When modifying organ positions in SVG, update BOTH locations:
-                //   1. The SVG path/shape in DigestiveTract component
-                //   2. The corresponding entry in this positions object
-                //
-                // Position format: { x, y, spread }
-                //   - x, y: center point where pellets cluster
-                //   - spread: radius of random distribution around center
-                // ============================================================
                 const positions = {
-                    mouth: { x: 145, y: 50, spread: 25 },        // SVG: path d="M100..."
-                    esophagus: { x: 240, y: 180, spread: 6 },    // SVG: rect x="230" y="120"
-                    stomach: { x: 240, y: 300, spread: 35 },     // SVG: ellipse cx="240" cy="300"
-                    small_intestine: { x: 240, y: 490, spread: 30 }, // SVG: path center ~240,490
-                    large_intestine: { x: 220, y: 700, spread: 30 }, // SVG: path at y=700
-                    complete: { x: 370, y: 660, spread: 8 }      // SVG: exit rect x="360" y="625"
+                    mouth: { x: 145, y: 50, spread: 25 },
+                    esophagus: { x: 240, y: 125, spread: 6 },
+                    stomach: { x: 240, y: 220, spread: 35 },
+                    small_intestine: { x: 240, y: 375, spread: 30 },
+                    large_intestine: { x: 220, y: 565, spread: 30 },
+                    complete: { x: 370, y: 505, spread: 8 }
                 };
                 
                 const pos = positions[phase];
@@ -862,44 +825,49 @@
                     
                     const nonAbsorbedIndex = nonAbsorbedPellets.indexOf(pellet);
                     
-                    let x, y;
-                    
+                    // Layout a griglia per fase complete (come in bocca)
                     if (phase === 'complete') {
-                        // Grid layout for remaining pellets at exit - similar to mouth
-                        const col = nonAbsorbedIndex % PELLET_GRID.COLUMNS;
-                        const row = Math.floor(nonAbsorbedIndex / PELLET_GRID.COLUMNS);
-                        x = pos.x + col * PELLET_GRID.SPACING_PX - (PELLET_GRID.COLUMNS * PELLET_GRID.SPACING_PX / 2) + PELLET_GRID.SPACING_PX / 2;
-                        y = pos.y + row * PELLET_GRID.SPACING_PX;
-                    } else {
-                        // Circular spread for other phases
-                        const angle = (nonAbsorbedIndex / nonAbsorbedPellets.length) * Math.PI * 2;
-                        const distance = Math.random() * pos.spread;
-                        x = pos.x + Math.cos(angle) * distance;
-                        y = pos.y + Math.sin(angle) * distance * 0.3;
+                        const cols = 5;
+                        const spacing = 14;
+                        const col = nonAbsorbedIndex % cols;
+                        const row = Math.floor(nonAbsorbedIndex / cols);
+                        // Calcola il numero effettivo di colonne nella riga corrente
+                        const totalRows = Math.ceil(nonAbsorbedPellets.length / cols);
+                        const isLastRow = row === totalRows - 1;
+                        const colsInThisRow = isLastRow ? ((nonAbsorbedPellets.length - 1) % cols) + 1 : cols;
+                        // Centra la griglia orizzontalmente
+                        const gridWidth = (colsInThisRow - 1) * spacing;
+                        const offsetX = -gridWidth / 2;
+                        return {
+                            ...pellet,
+                            x: pos.x + offsetX + col * spacing,
+                            y: pos.y + row * 10
+                        };
                     }
+                    
+                    // Layout circolare per le altre fasi
+                    const angle = (nonAbsorbedIndex / Math.max(nonAbsorbedPellets.length, 1)) * Math.PI * 2;
+                    const distance = Math.random() * pos.spread;
                     
                     return {
                         ...pellet,
-                        x: x,
-                        y: y
+                        x: pos.x + Math.cos(angle) * distance,
+                        y: pos.y + Math.sin(angle) * distance * 0.4
                     };
                 });
             };
             
-            // Handle absorption based on phase
+            // Handle absorption
             const handleAbsorption = (phase, currentPellets, foodId) => {
                 if (phase === 'small_intestine') {
                     return currentPellets.map(pellet => {
-                        // Pure water (water food) is fully absorbed in small intestine
                         if (foodId === 'water' && pellet.type === 'water') {
                             return { ...pellet, absorbed: true, exitDirection: 'right' };
                         }
-                        // Water in other foods: partial absorption here, rest in large intestine
-                        if (pellet.type === 'water' && Math.random() < ABSORPTION_RATES.WATER_IN_SMALL_INTESTINE) {
+                        if (pellet.type === 'water' && Math.random() > 0.5) {
                             return { ...pellet, absorbed: true, exitDirection: 'right' };
                         }
-                        // Carbs, proteins, fats: most absorption happens here
-                        if (['carbs', 'protein', 'fat'].includes(pellet.type) && Math.random() < ABSORPTION_RATES.NUTRIENTS_IN_SMALL_INTESTINE) {
+                        if (['carbs', 'protein', 'fat'].includes(pellet.type) && Math.random() > 0.3) {
                             return { ...pellet, absorbed: true, exitDirection: 'right' };
                         }
                         return pellet;
@@ -907,7 +875,6 @@
                 }
                 
                 if (phase === 'large_intestine') {
-                    // Remaining water from food gets absorbed here
                     return currentPellets.map(pellet => {
                         if (pellet.type === 'water' && !pellet.absorbed) {
                             return { ...pellet, absorbed: true, exitDirection: 'right' };
@@ -937,13 +904,11 @@
                 const nextPhase = selectedFood.phases[nextIndex];
                 setCurrentPhaseIndex(nextIndex);
                 
-                // First: move pellets to new position
                 setPellets(prev => movePelletsToPhase(nextPhase, prev));
                 
-                // Then: after a delay, absorb the ones that should be absorbed
                 setTimeout(() => {
                     setPellets(prev => handleAbsorption(nextPhase, prev, selectedFood.id));
-                }, ANIMATION.PELLET_MOVE_DELAY_MS);
+                }, 600);
             };
             
             // Restart
@@ -953,60 +918,59 @@
                 setPellets([]);
             };
             
-            // Get phase-specific info
-            const getPhaseInfo = () => {
-                if (!selectedFood || !currentPhase) return null;
-                const foodDesc = phaseDescriptions[selectedFood.id];
-                if (!foodDesc) return null;
-                return foodDesc[currentPhase];
-            };
-            
-            const phaseInfo = getPhaseInfo();
-            const phaseName = currentPhase ? phases[currentPhase] : null;
-            
             return (
-                <div className="min-h-screen bg-gray-900 text-white p-4">
-                    <div className="max-w-6xl mx-auto">
-                        {/* Header */}
-                        <div className="flex justify-between items-center mb-6">
-                            <div>
-                                <h1 className="text-2xl font-bold">{t.title}</h1>
-                                <p className="text-gray-400 text-sm">{t.subtitle}</p>
+                <div className="min-h-screen bg-gray-900 py-4 px-3">
+                    <div className="max-w-4xl mx-auto">
+                        
+                        {/* Header compatto: titolo + lingua sulla stessa riga */}
+                        <div className="flex items-center justify-between mb-4">
+                            <h1 className="text-2xl font-bold text-white">{t.title}</h1>
+                            <div className="flex gap-1 bg-gray-800 rounded-lg p-1">
+                                <button
+                                    onClick={() => setLanguage('en')}
+                                    className={`px-3 py-1 rounded text-sm font-medium transition ${
+                                        language === 'en' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'
+                                    }`}
+                                >
+                                    EN
+                                </button>
+                                <button
+                                    onClick={() => setLanguage('it')}
+                                    className={`px-3 py-1 rounded text-sm font-medium transition ${
+                                        language === 'it' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'
+                                    }`}
+                                >
+                                    IT
+                                </button>
                             </div>
-                            <button
-                                onClick={() => setLanguage(language === 'en' ? 'it' : 'en')}
-                                className="px-3 py-1 bg-gray-700 rounded-lg text-sm hover:bg-gray-600 transition"
-                                aria-label={language === 'en' ? 'Switch to Italian' : 'Passa a inglese'}
-                            >
-                                {language === 'en' ? '🇮🇹 Italiano' : '🇬🇧 English'}
-                            </button>
                         </div>
                         
-                        {/* Food Selection */}
-                        {!selectedFood && (
-                            <div className="bg-gray-800 rounded-xl p-6 mb-6">
-                                <h2 className="text-lg font-semibold mb-4">{t.selectFood}</h2>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-                                    {Object.values(foods).map(food => (
-                                        <button
-                                            key={food.id}
-                                            onClick={() => handleSelectFood(food.id)}
-                                            className="flex flex-col items-center p-4 bg-gray-700 rounded-xl hover:bg-gray-600 transition"
-                                        >
-                                            <span className="text-3xl mb-2">{food.icon}</span>
-                                            <span className="text-sm">{language === 'it' ? food.nameIT : food.nameEN}</span>
-                                            <span className="text-xs text-gray-400 mt-1">{food.totalTime}</span>
-                                        </button>
-                                    ))}
-                                </div>
+                        {/* Food selector */}
+                        <div className="bg-gray-800 rounded-xl p-3 mb-4">
+                            <p className="text-gray-400 text-sm mb-2">{t.selectFood}</p>
+                            <div className="flex flex-wrap gap-2">
+                                {Object.values(foods).map(food => (
+                                    <button
+                                        key={food.id}
+                                        onClick={() => handleSelectFood(food.id)}
+                                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition ${
+                                            selectedFood?.id === food.id
+                                                ? 'bg-blue-600 text-white'
+                                                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                        }`}
+                                    >
+                                        <span className="text-lg">{food.icon}</span>
+                                        <span>{language === 'it' ? food.nameIT : food.nameEN}</span>
+                                    </button>
+                                ))}
                             </div>
-                        )}
+                        </div>
                         
-                        {/* Simulator */}
                         {selectedFood && (
-                            <div className="grid md:grid-cols-2 gap-6">
-                                {/* Visualization */}
-                                <div className="bg-gray-800 rounded-xl p-4">
+                            <div className="grid lg:grid-cols-2 gap-4">
+                                
+                                {/* Visualization + BUTTONS */}
+                                <div className="bg-gray-800 rounded-xl p-3">
                                     <DigestiveTract
                                         currentPhase={currentPhase}
                                         pellets={pellets}
@@ -1015,26 +979,34 @@
                                         chewFrame={chewFrame}
                                     />
                                     
-                                    {/* Legend */}
-                                    <div className="mt-4 pt-4 border-t border-gray-700">
-                                        <p className="text-sm text-gray-400 mb-2">{t.legend}</p>
-                                        <div className="flex flex-wrap gap-3">
-                                            {Object.entries(pelletTypes).map(([key, info]) => (
-                                                <div key={key} className="flex items-center gap-1">
-                                                    <div 
-                                                        className="w-3 h-3 rounded-full" 
-                                                        style={{ backgroundColor: info.color }}
-                                                    />
-                                                    <span className="text-xs text-gray-300">
-                                                        {language === 'it' ? info.nameIT : info.nameEN}
-                                                    </span>
-                                                </div>
-                                            ))}
-                                        </div>
+                                    {/* Controls - sotto il simulatore */}
+                                    <div className="flex gap-3 mt-3 pt-3 border-t border-gray-700">
+                                        {currentPhase !== 'complete' ? (
+                                            <button
+                                                onClick={handleNextPhase}
+                                                className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
+                                            >
+                                                {t.next}
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={handleRestart}
+                                                className="flex-1 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition"
+                                            >
+                                                {t.tryAnother}
+                                            </button>
+                                        )}
+                                        
+                                        <button
+                                            onClick={handleRestart}
+                                            className="px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition"
+                                        >
+                                            {t.restart}
+                                        </button>
                                     </div>
                                 </div>
                                 
-                                {/* Info panel */}
+                                {/* Info panel + LEGEND */}
                                 <div className="space-y-4">
                                     
                                     {/* Phase indicator */}
@@ -1070,82 +1042,90 @@
                                             </p>
                                             
                                             {phaseInfo.durationEN && (
-                                                <div className="mb-2">
-                                                    <span className="text-gray-500 text-sm">{t.duration}: </span>
-                                                    <span className="text-white text-sm">
-                                                        {language === 'it' ? phaseInfo.durationIT : phaseInfo.durationEN}
-                                                    </span>
+                                                <div className="flex gap-4 text-sm mb-3">
+                                                    <div>
+                                                        <span className="text-gray-500">{t.duration}: </span>
+                                                        <span className="text-gray-300">
+                                                            {language === 'it' ? phaseInfo.durationIT : phaseInfo.durationEN}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             )}
                                             
                                             {phaseInfo.actionEN && (
-                                                <div className="bg-gray-700 rounded-lg p-3 mb-3">
-                                                    <p className="text-blue-400 text-sm font-medium">
+                                                <div className="bg-gray-700/50 rounded-lg p-3">
+                                                    <span className="text-gray-400 text-xs">{t.action}: </span>
+                                                    <span className="text-white text-sm">
                                                         {language === 'it' ? phaseInfo.actionIT : phaseInfo.actionEN}
-                                                    </p>
+                                                    </span>
                                                 </div>
                                             )}
                                             
-                                            {phaseInfo.exitsEN && phaseInfo.exitsEN.length > 0 && (
-                                                <div className="bg-green-900/30 rounded-lg p-3">
-                                                    <p className="text-green-400 text-xs mb-1">{t.exits}:</p>
-                                                    {(language === 'it' ? phaseInfo.exitsIT : phaseInfo.exitsEN).map((exit, i) => (
-                                                        <p key={i} className="text-green-300 text-sm">? {exit}</p>
-                                                    ))}
+                                            {phaseInfo.exitsEN && (
+                                                <div className="mt-3 bg-green-900/30 border border-green-700/50 rounded-lg p-3">
+                                                    <span className="text-green-400 text-xs">{t.exits}: </span>
+                                                    <div className="mt-1">
+                                                        {(language === 'it' ? phaseInfo.exitsIT : phaseInfo.exitsEN).map((exit, i) => (
+                                                            <div key={i} className="text-green-200 text-sm">
+                                                                → {exit}
+                                                            </div>
+                                                        ))}
+                                                    </div>
                                                 </div>
                                             )}
                                         </div>
                                     )}
                                     
-                                    {/* Complete phase */}
+                                    {/* Complete message */}
                                     {currentPhase === 'complete' && phaseInfo && (
-                                        <div className="bg-green-900/30 rounded-xl p-4">
-                                            <h3 className="text-xl font-bold text-green-400 mb-2">
-                                                ?? {t.complete}
-                                            </h3>
-                                            <p className="text-gray-300 text-sm">
+                                        <div className="bg-green-900/30 border border-green-700/50 rounded-xl p-6 text-center">
+                                            <p className="text-2xl mb-2">✅</p>
+                                            <p className="text-green-200 text-lg font-medium">{t.complete}</p>
+                                            <p className="text-gray-300 text-sm mt-2">
                                                 {language === 'it' ? phaseInfo.descIT : phaseInfo.descEN}
                                             </p>
                                         </div>
                                     )}
                                     
-                                    {/* Controls */}
-                                    <div className="flex gap-3">
-                                        {currentPhase !== 'complete' ? (
-                                            <button
-                                                onClick={handleNextPhase}
-                                                className="flex-1 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl font-semibold transition"
-                                            >
-                                                {t.next}
-                                            </button>
-                                        ) : (
-                                            <button
-                                                onClick={handleRestart}
-                                                className="flex-1 py-3 bg-green-600 hover:bg-green-500 rounded-xl font-semibold transition"
-                                            >
-                                                {t.tryAnother}
-                                            </button>
-                                        )}
-                                        
-                                        <button
-                                            onClick={handleRestart}
-                                            className="px-4 py-3 bg-gray-700 hover:bg-gray-600 rounded-xl transition"
-                                        >
-                                            {t.restart}
-                                        </button>
+                                    {/* Legend - nel pannello info */}
+                                    <div className="bg-gray-800 rounded-xl p-4">
+                                        <p className="text-gray-400 text-xs mb-2">{t.legend}</p>
+                                        <div className="flex flex-wrap gap-3">
+                                            {Object.entries(pelletTypes).map(([key, info]) => (
+                                                <div key={key} className="flex items-center gap-1">
+                                                    <div
+                                                        className="w-3 h-3 rounded-full"
+                                                        style={{ backgroundColor: info.color }}
+                                                    />
+                                                    <span className="text-gray-300 text-xs">
+                                                        {language === 'it' ? info.nameIT : info.nameEN}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
-                                    
-                                    {/* Note */}
-                                    <p className="text-xs text-gray-500 italic">
-                                        {t.note}
-                                    </p>
                                 </div>
                             </div>
                         )}
                         
-                        {/* Footer */}
-                        <div className="mt-8 text-center text-gray-500 text-sm">
-                            {t.credits} <a href="https://ai-know.pro" className="text-blue-400 hover:underline">Paolo Dalprato</a>
+                        {/* Note */}
+                        <div className="mt-4 text-center">
+                            <p className="text-gray-500 text-xs italic">{t.note}</p>
+                        </div>
+                        
+                        {/* Credits */}
+                        <div className="mt-4 text-center">
+                            <p className="text-gray-500 text-sm">
+                                {t.credits}{' '}
+                                <a
+                                    href="https://ai-know.pro"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-400 hover:text-blue-300 transition"
+                                >
+                                    Paolo Dalprato
+                                </a>
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -1155,4 +1135,4 @@
         ReactDOM.render(<DigestiveSimulator />, document.getElementById('root'));
     </script>
 </body>
-</html>`n
+</html>
