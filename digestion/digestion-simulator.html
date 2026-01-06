@@ -945,26 +945,28 @@
                             </div>
                         </div>
                         
-                        {/* Food selector */}
-                        <div className="bg-gray-800 rounded-xl p-3 mb-4">
-                            <p className="text-gray-400 text-sm mb-2">{t.selectFood}</p>
-                            <div className="flex flex-wrap gap-2">
-                                {Object.values(foods).map(food => (
-                                    <button
-                                        key={food.id}
-                                        onClick={() => handleSelectFood(food.id)}
-                                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition ${
-                                            selectedFood?.id === food.id
-                                                ? 'bg-blue-600 text-white'
-                                                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                                        }`}
-                                    >
-                                        <span className="text-lg">{food.icon}</span>
-                                        <span>{language === 'it' ? food.nameIT : food.nameEN}</span>
-                                    </button>
-                                ))}
+                        {/* Food selector - visibile solo quando nessun cibo è selezionato */}
+                        {!selectedFood && (
+                            <div className="bg-gray-800 rounded-xl p-3 mb-4">
+                                <p className="text-gray-400 text-sm mb-2">{t.selectFood}</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {Object.values(foods).map(food => (
+                                        <button
+                                            key={food.id}
+                                            onClick={() => handleSelectFood(food.id)}
+                                            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition ${
+                                                selectedFood?.id === food.id
+                                                    ? 'bg-blue-600 text-white'
+                                                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                            }`}
+                                        >
+                                            <span className="text-lg">{food.icon}</span>
+                                            <span>{language === 'it' ? food.nameIT : food.nameEN}</span>
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
+                        )}
                         
                         {selectedFood && (
                             <div className="grid lg:grid-cols-2 gap-4">
