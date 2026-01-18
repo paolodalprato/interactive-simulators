@@ -20,7 +20,7 @@ jobs:
           mkdir -p release-assets
 
           # List of simulator directories (add new ones here)
-          SIMULATORS="heart digestion branching-navigator gravity"
+          SIMULATORS="heart digestion gravity"
 
           for dir in $SIMULATORS; do
             if [ -d "$dir" ]; then
@@ -48,8 +48,9 @@ jobs:
           **Available simulators:**
           - 🫀 **heart-simulator.zip** - Interactive heart anatomy
           - 🍽️ **digestion-simulator.zip** - Digestive system visualization
-          - 🧭 **branching-navigator-simulator.zip** - Branching navigator tool
           - 🌍 **gravity-simulator.zip** - Gravity physics simulation
+
+          > **Note**: Branching Navigator has moved to its own repository: [paolodalprato/branching-navigator](https://github.com/paolodalprato/branching-navigator)
 
           _Auto-generated on every push to main._" \
             --latest \
