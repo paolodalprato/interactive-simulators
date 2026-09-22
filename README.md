@@ -15,6 +15,7 @@ Make learning more accessible through interactive visualizations that allow you 
 | ❤️ [Heart](./heart/) | How the human heart works: the cardiac cycle in 7 steps | [Open](https://paolodalprato.github.io/interactive-simulators/heart/heart-simulator.html) | [ZIP](https://github.com/paolodalprato/interactive-simulators/releases/latest/download/heart-simulator.zip) |
 | 🌌 [Gravity](./gravity/) | Explore gravitational attraction and emergent behavior from simple physical rules | [Open](https://paolodalprato.github.io/interactive-simulators/gravity/gravity-simulator.html) | [ZIP](https://github.com/paolodalprato/interactive-simulators/releases/latest/download/gravity-simulator.zip) |
 | 🍽️ [Digestion](./digestion/) | Follow food through the digestive system and see how nutrients are absorbed | [Open](https://paolodalprato.github.io/interactive-simulators/digestion/digestion-simulator.html) | [ZIP](https://github.com/paolodalprato/interactive-simulators/releases/latest/download/digestion-simulator.zip) |
+| 🧠 [Context Window](./context-window/) | Explore what enters the context window at the start of a chat | [Open](https://paolodalprato.github.io/interactive-simulators/context-window/context-window-simulator.html) | [ZIP](https://github.com/paolodalprato/interactive-simulators/releases/latest/download/context-window-simulator.zip) |
 
 ## ✨ Common Features
 
@@ -83,7 +84,6 @@ You are free to use, modify, and distribute these simulators, even for commercia
 **Paolo Dalprato**
 
 - 🌐 Website: [ai-know.pro](https://ai-know.pro)
-- 📰 Substack: [paolodalprato.substack.com](https://paolodalprato.substack.com)
 - 🐙 GitHub: [@paolodalprato](https://github.com/paolodalprato)
 
 ---

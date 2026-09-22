@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cosa entra nella finestra di contesto?</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f7f6;
+      --surface: #ffffff;
+      --surface-2: #edf3f1;
+      --text: #17211e;
+      --muted: #5d6b66;
+      --line: #cfd9d5;
+      --brand: #245d52;
+      --brand-dark: #17463d;
+      --brand-soft: #dcebe6;
+      --platform: #5b4b8a;
+      --application: #2b6f9f;
+      --user: #9a5a20;
+      --project: #65720f;
+      --memory: #8a3f67;
+      --knowledge: #087f72;
+      --tools: #746230;
+      --request: #2d6744;
+      --reserve: #d9dfdc;
+      --danger: #a33b32;
+      --shadow: 0 10px 30px rgba(23, 33, 30, .08);
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.45;
+    }
+
+    button, input { font: inherit; }
+
+    button:focus-visible, input:focus-visible, summary:focus-visible {
+      outline: 3px solid rgba(36, 93, 82, .35);
+      outline-offset: 2px;
+    }
+
+    .app {
+      width: min(1440px, 100%);
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 20px;
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin-bottom: 6px; font-size: clamp(1.65rem, 3vw, 2.35rem); line-height: 1.15; }
+    h2 { margin-bottom: 12px; font-size: 1.12rem; }
+    h3 { margin-bottom: 6px; font-size: 1rem; }
+
+    .subtitle { margin: 0; color: var(--muted); max-width: 760px; }
+
+    .reset {
+      flex: 0 0 auto;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--text);
+      padding: 9px 14px;
+      cursor: pointer;
+    }
+
+    .reset:hover { background: var(--surface-2); }
+
+    .header-actions {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .field { display: grid; gap: 4px; }
+    .field label { color: var(--muted); font-size: .76rem; }
+
+    select {
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--text);
+      padding: 7px 34px 7px 10px;
+    }
+
+    .lesson {
+      display: grid;
+      grid-template-columns: minmax(300px, .85fr) minmax(440px, 1.35fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .eyebrow {
+      color: var(--brand);
+      font-size: .76rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 7px;
+    }
+
+    .hint, .small { color: var(--muted); font-size: .88rem; }
+    .hint { margin-bottom: 14px; }
+
+    .switches { display: grid; gap: 8px; }
+
+    .switch-row {
+      display: grid;
+      grid-template-columns: 22px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: start;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+    }
+
+    .switch-row input { width: 18px; height: 18px; margin: 2px 0 0; accent-color: var(--brand); }
+    .switch-row label { cursor: pointer; }
+    .switch-row strong { display: block; font-size: .92rem; }
+    .switch-row span { display: block; color: var(--muted); font-size: .76rem; }
+
+    .info-button {
+      width: 26px;
+      height: 26px;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      background: var(--surface-2);
+      color: var(--brand-dark);
+      font-weight: 700;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .info-button:hover { background: var(--brand-soft); }
+
+    .component-info {
+      grid-column: 2 / -1;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px 16px;
+      margin-top: 2px;
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: .78rem;
+    }
+
+    .component-info[hidden] { display: none; }
+    .component-info p { margin: 0; }
+    .component-info strong { display: inline; color: var(--text); font-size: inherit; }
+
+    .window-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+
+    .meter-label { color: var(--muted); font-size: .82rem; }
+    .meter-label strong { color: var(--text); font-variant-numeric: tabular-nums; }
+
+    .meter {
+      height: 12px;
+      background: var(--reserve);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .meter-fill {
+      height: 100%;
+      width: 0;
+      background: var(--brand);
+      transition: width .25s ease;
+    }
+
+    .stack-note { margin: -5px 0 12px; }
+
+    .context-window {
+      display: flex;
+      min-height: 470px;
+      flex-direction: column;
+      gap: 7px;
+      padding: 12px;
+      background: #fafcfb;
+      border: 2px solid var(--brand-dark);
+      border-radius: 12px;
+    }
+
+    .context-block {
+      position: relative;
+      border-radius: 9px;
+      padding: 10px 12px 9px 15px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-left: 7px solid var(--block-color);
+      animation: enter .2s ease-out;
+    }
+
+    .context-block strong { display: block; padding-right: 80px; font-size: .9rem; }
+    .context-block p { margin: 3px 0 0; color: var(--muted); font-size: .8rem; }
+    .context-block .size { position: absolute; top: 9px; right: 10px; color: var(--muted); font-size: .72rem; }
+
+    .response-reserve {
+      flex: 1 1 auto;
+      min-height: 68px;
+      border: 2px dashed #aab5b1;
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 10px;
+      color: var(--muted);
+      background: repeating-linear-gradient(-45deg, #f3f5f4, #f3f5f4 8px, #e9eeec 8px, #e9eeec 16px);
+      font-size: .82rem;
+    }
+
+    details {
+      margin-top: 18px;
+      border-top: 1px solid var(--line);
+      padding-top: 14px;
+    }
+
+    summary { cursor: pointer; font-weight: 650; }
+    details p { margin: 10px 0 0; color: var(--muted); font-size: .86rem; }
+
+    .footer-note {
+      margin: 18px 0 0;
+      color: var(--muted);
+      font-size: .8rem;
+      text-align: center;
+    }
+
+    .credits {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+      margin-top: 9px;
+      color: var(--muted);
+      font-size: .8rem;
+    }
+
+    .credits a { color: var(--brand-dark); font-weight: 650; text-decoration: none; }
+    .credits a:hover { text-decoration: underline; }
+    .credit-logo { width: 24px; height: 24px; object-fit: contain; }
+    .credit-owner { display: inline-flex; align-items: center; gap: 7px; }
+
+    @keyframes enter {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+
+    @media (max-width: 1040px) {
+      .lesson { grid-template-columns: minmax(270px, .82fr) minmax(380px, 1.18fr); }
+    }
+
+    @media (max-width: 720px) {
+      .app { padding: 16px; }
+      header { flex-direction: column; gap: 12px; }
+      .header-actions { justify-content: flex-start; }
+      .lesson { grid-template-columns: 1fr; }
+      .context-window { min-height: 420px; }
+      .component-info { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div>
+        <h1 id="page-title">Cosa entra nella finestra di contesto?</h1>
+        <p class="subtitle" id="page-subtitle">Alla prima domanda il modello non riceve necessariamente solo il testo visibile nella chat. Attiva i componenti e osserva come l’applicazione assembla il contesto iniziale.</p>
+      </div>
+      <div class="header-actions">
+        <div class="field">
+          <label for="language" id="language-label">Lingua</label>
+          <select id="language">
+            <option value="it">Italiano</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+        <button class="reset" id="reset" type="button">Ripristina</button>
+      </div>
+    </header>
+
+    <section class="lesson" aria-label="Simulazione della finestra di contesto">
+      <aside class="panel">
+        <p class="eyebrow" id="step-1">1 · Scegli i componenti</p>
+        <h2 id="available-title">Materiale disponibile</h2>
+        <p class="hint" id="available-hint">La domanda corrente e le istruzioni di sistema sono sempre presenti. Gli altri componenti possono essere aggiunti dall’applicazione.</p>
+        <div class="switches" id="switches"></div>
+        <details>
+          <summary id="simplification-title">Che cosa stiamo semplificando?</summary>
+          <p id="simplification-text">Ordine, nomi e composizione esatta cambiano tra prodotti e API. In questo schema il cosiddetto <em>system prompt</em> rientra nelle istruzioni di sistema della piattaforma: non è un testo intrinseco al modello e normalmente non è visibile all’utente. I valori sono stime didattiche plausibili, non misure di un prodotto specifico.</p>
+        </details>
+      </aside>
+
+      <section class="panel">
+        <p class="eyebrow" id="step-2">2 · Osserva l’assemblaggio</p>
+        <div class="window-head">
+          <h2 id="window-title">Finestra di contesto</h2>
+          <div class="meter-label"><strong id="used">0</strong> <span id="capacity-label"></span></div>
+        </div>
+        <div class="field" style="margin-bottom:14px">
+          <label for="capacity" id="model-window-label">Capacità del modello</label>
+          <select id="capacity">
+            <option value="200">200.000 token</option>
+            <option value="1000">1.000.000 token</option>
+          </select>
+        </div>
+        <div class="meter" role="progressbar" aria-label="Spazio occupato nella finestra" aria-valuemin="0" aria-valuemax="200" aria-valuenow="0">
+          <div class="meter-fill" id="meter-fill"></div>
+        </div>
+        <p class="small stack-note" id="stack-note">La pila si costruisce dal basso verso l’alto; la domanda corrente resta sopra gli altri componenti.</p>
+        <div class="context-window" id="context-window" aria-live="polite"></div>
+      </section>
+
+    </section>
+
+    <p class="footer-note" id="footer-note">Esempio deterministico: nessun modello AI, account, collegamento esterno o servizio remoto viene utilizzato.</p>
+    <div class="credits">
+      <a class="credit-owner" href="https://www.ai-know.pro/" target="_blank" rel="noopener noreferrer">
+        <img class="credit-logo" alt="" src="data:image/png;base64,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">
+        <span>Paolo Dalprato – ai-know.pro</span>
+      </a>
+      <span aria-hidden="true">·</span>
+      <span id="developed-with">Sviluppato con GPT-5.6 Sol</span>
+      <span aria-hidden="true">·</span>
+      <span id="license">Licenza MIT</span>
+    </div>
+  </main>
+
+  <script>
+    const ui = {
+      it: {
+        documentTitle: 'Cosa entra nella finestra di contesto?',
+        pageTitle: 'Cosa entra nella finestra di contesto?',
+        pageSubtitle: 'Alla prima domanda il modello non riceve necessariamente solo il testo visibile nella chat. Attiva i componenti e osserva come l’applicazione assembla il contesto iniziale.',
+        languageLabel: 'Lingua', reset: 'Ripristina', step1: '1 · Scegli i componenti',
+        availableTitle: 'Materiale disponibile',
+        availableHint: 'La richiesta dell’utente e le istruzioni di sistema sono sempre presenti. Gli altri componenti possono essere aggiunti dall’applicazione.',
+        simplificationTitle: 'Che cosa stiamo semplificando?',
+        simplificationText: 'Ordine, nomi e composizione esatta cambiano tra prodotti e API. In questo schema il cosiddetto <em>system prompt</em> rientra nelle istruzioni di sistema della piattaforma: non è un testo intrinseco al modello e normalmente non è visibile all’utente. I valori sono stime didattiche plausibili, non misure di un prodotto specifico.',
+        step2: '2 · Osserva l’assemblaggio', windowTitle: 'Finestra di contesto',
+        modelWindowLabel: 'Capacità del modello', occupied: 'occupati',
+        meterAria: 'Token occupati nella finestra di contesto',
+        stackNote: 'La pila si costruisce dal basso verso l’alto; la domanda corrente resta sopra gli altri componenti.',
+        footerNote: 'Esempio deterministico: nessun modello AI, account, collegamento esterno o servizio remoto viene utilizzato.',
+        developedWith: 'Sviluppato con GPT-5.6 Sol', license: 'Licenza MIT', info: 'Informazioni',
+        represents: 'Che cosa rappresenta', managedBy: 'Gestito o alimentato da', location: 'Dove si trova', presence: 'Presenza', required: 'Inclusa in ogni avvio', optional: 'Opzionale', entersAs: 'Come entra nel contesto', visibility: 'Visibilità',
+        availableSpace: 'Spazio ancora disponibile', responseReserve: 'Riserva utilizzabile anche per generare la risposta.'
+      },
+      en: {
+        documentTitle: 'What enters the context window?',
+        pageTitle: 'What enters the context window?',
+        pageSubtitle: 'At the first request, the model does not necessarily receive only the text visible in the chat. Enable the components and observe how the application assembles the initial context.',
+        languageLabel: 'Language', reset: 'Reset', step1: '1 · Choose the components',
+        availableTitle: 'Available material',
+        availableHint: 'The current request and system instructions are always present. The application may add the other components.',
+        simplificationTitle: 'What are we simplifying?',
+        simplificationText: 'Exact order, names, and composition vary across products and APIs. In this model, the so-called <em>system prompt</em> is included in the platform system instructions: it is not an intrinsic part of the model and is normally hidden from the user. Token values are plausible teaching estimates, not measurements from a specific product.',
+        step2: '2 · Observe the assembly', windowTitle: 'Context window',
+        modelWindowLabel: 'Model capacity', occupied: 'used',
+        meterAria: 'Tokens used in the context window',
+        stackNote: 'The stack grows from the bottom upwards; the current request remains above the other components.',
+        footerNote: 'Deterministic example: no AI model, account, external connection, or remote service is used.',
+        developedWith: 'Developed with GPT-5.6 Sol', license: 'MIT License', info: 'Information',
+        represents: 'What it represents', managedBy: 'Managed or supplied by', location: 'Where it resides', presence: 'Presence', required: 'Always present', optional: 'Optional', entersAs: 'How it enters the context', visibility: 'Visibility',
+        availableSpace: 'Space still available', responseReserve: 'Reserve also available for generating the response.'
+      }
+    };
+
+    const components = [
+      {
+        id: 'platform', sizeK: 4, color: 'var(--platform)', required: true, initial: true,
+        it: ['Istruzioni di sistema della piattaforma', 'System prompt, regole generali e vincoli di sicurezza', 'Istruzioni ad alta priorità fornite dalla piattaforma: rispondi in modo utile, corretto e sicuro.'],
+        en: ['Platform system instructions', 'System prompt, general rules, and safety constraints', 'High-priority instructions supplied by the platform: respond in a helpful, accurate, and safe way.'],
+        info: {
+          it: ['Fornitore della piattaforma; talvolta amministratore dell’organizzazione', 'Configurazione interna della piattaforma', 'Il prompt di sistema e le altre istruzioni predisposte dalla piattaforma vengono aggiunti automaticamente prima della richiesta', 'Normalmente non visibili all’utente'],
+          en: ['Platform provider; sometimes the organization administrator', 'Internal platform configuration', 'The system prompt and other instructions set by the platform are added automatically before the request', 'Normally hidden from the user']
+        }
+      },
+      {
+        id: 'request', sizeK: 1, color: 'var(--request)', required: true, initial: true,
+        it: ['Richiesta dell’utente', 'Messaggio corrente ed eventuali allegati del turno', 'Prepara una sintesi sull’adozione dell’AI in azienda.'],
+        en: ['User request', 'Current message and any attachments in this turn', 'Prepare a summary about AI adoption in a company.'],
+        info: {
+          it: ['Utente', 'Turno corrente della conversazione', 'Entra direttamente come input del turno', 'Visibile all’utente'],
+          en: ['User', 'Current conversation turn', 'Always present: enters directly as the turn input', 'Visible to the user']
+        }
+      },
+      {
+        id: 'application', sizeK: 2, color: 'var(--application)', initial: true,
+        it: ['Istruzioni dell’applicazione', 'Regole dello specifico assistente o dell’applicazione', 'Agisci come assistente per la formazione aziendale.'],
+        en: ['Application instructions', 'Rules of the specific assistant or application', 'Act as an assistant for corporate training.'],
+        info: {
+          it: ['Creatore del GPT, dell’assistente o dell’applicazione', 'Configurazione dello specifico assistente o dell’applicazione', 'Sono aggiunte quando si usa quell’assistente o applicazione', 'Possono essere visibili solo in parte'],
+          en: ['Creator of the GPT, assistant, or application', 'Configuration of the specific assistant or application', 'Added when that assistant or application is used', 'May be only partly visible']
+        }
+      },
+      {
+        id: 'personalization', sizeK: 1, color: 'var(--user)', initial: false,
+        it: ['Personalizzazione dell’utente', 'Preferenze generali valide tra più conversazioni', 'Usa un linguaggio professionale, chiaro e non tecnico.'],
+        en: ['User personalization', 'General preferences used across conversations', 'Use professional, clear, and non-technical language.'],
+        info: {
+          it: ['Utente', 'Impostazioni generali dell’account', 'Vengono applicate alle conversazioni previste dalla configurazione', 'Visibili e modificabili dall’utente'],
+          en: ['User', 'General account settings', 'Applied to conversations covered by the configuration', 'Visible and editable by the user']
+        }
+      },
+      {
+        id: 'project', sizeK: 3, color: 'var(--project)', initial: false,
+        it: ['Istruzioni del progetto', 'Regole specifiche dell’attività corrente', 'Destinatari: responsabili di piccole e medie imprese italiane.'],
+        en: ['Project instructions', 'Rules specific to the current activity', 'Audience: managers of Italian small and medium-sized companies.'],
+        info: {
+          it: ['Creatore o gestore del progetto', 'Configurazione del progetto', 'Sono applicate alle conversazioni del progetto', 'Visibili a chi può accedere alla configurazione'],
+          en: ['Project creator or manager', 'Project configuration', 'Applied to conversations in the project', 'Visible to people who can access the configuration']
+        }
+      },
+      {
+        id: 'memory', sizeK: 2, color: 'var(--memory)', initial: false,
+        it: ['Memoria', 'Informazioni persistenti pertinenti alla conversazione', 'L’utente preferisce esempi concreti e un tono neutro.'],
+        en: ['Memory', 'Persistent information relevant to the conversation', 'The user prefers concrete examples and a neutral tone.'],
+        info: {
+          it: ['Sistema o applicazione e utente', 'Memoria generale o memoria del progetto, secondo il prodotto', 'Le informazioni pertinenti possono essere selezionate per il turno', 'L’utente può consultarla o modificarla secondo il prodotto'],
+          en: ['System or application and user', 'General memory or project memory, depending on the product', 'Relevant information may be selected for the turn', 'The user may review or edit it depending on the product']
+        }
+      },
+      {
+        id: 'knowledge', sizeK: 32, color: 'var(--knowledge)', initial: false,
+        it: ['Conoscenza del progetto', 'Contenuti provenienti da file e fonti del progetto', 'Dal documento: l’azienda ha 45 dipendenti e sta valutando un progetto pilota.'],
+        en: ['Project knowledge', 'Content from project files and sources', 'From the document: the company has 45 employees and is considering a pilot project.'],
+        info: {
+          it: ['Utente o collaboratori del progetto', 'File, testi e fonti associati al progetto', 'Vengono inseriti i contenuti utili, spesso solo nelle parti pertinenti', 'Le fonti sono normalmente accessibili nel progetto'],
+          en: ['User or project collaborators', 'Files, text, and sources associated with the project', 'Useful content is inserted, often only the relevant sections', 'Sources are normally accessible within the project']
+        }
+      },
+      {
+        id: 'tools', sizeK: 6, color: 'var(--tools)', initial: false,
+        it: ['Strumenti disponibili', 'Funzioni, app, connettori e server MCP utilizzabili', 'Strumenti disponibili: ricerca nei documenti e calcolatore dei costi.'],
+        en: ['Available tools', 'Functions, apps, connectors, and MCP servers that can be used', 'Available tools: document search and cost calculator.'],
+        info: {
+          it: ['Piattaforma, amministratore, sviluppatore o utente', 'Registro degli strumenti e delle integrazioni abilitate', 'Le descrizioni e i parametri degli strumenti entrano nel contesto; un eventuale risultato entra solo dopo l’esecuzione', 'La disponibilità è visibile; le istruzioni tecniche possono non esserlo'],
+          en: ['Platform, administrator, developer, or user', 'Registry of enabled tools and integrations', 'Tool descriptions and parameters enter the context; a result enters only after execution', 'Availability is visible; technical instructions may not be']
+        }
+      }
+    ];
+
+    let language = 'it';
+    let capacityK = 200;
+    const state = Object.fromEntries(components.map(item => [item.id, item.initial]));
+    const stackOrder = ['request', 'tools', 'memory', 'knowledge', 'project', 'personalization', 'application', 'platform'];
+    const controlOrder = stackOrder;
+    const switches = document.getElementById('switches');
+    const contextWindow = document.getElementById('context-window');
+    const usedLabel = document.getElementById('used');
+    const meter = document.querySelector('.meter');
+    const meterFill = document.getElementById('meter-fill');
+
+    const staticBindings = {
+      'page-title': 'pageTitle', 'page-subtitle': 'pageSubtitle',
+      'language-label': 'languageLabel', 'reset': 'reset', 'step-1': 'step1',
+      'available-title': 'availableTitle', 'available-hint': 'availableHint',
+      'simplification-title': 'simplificationTitle', 'step-2': 'step2', 'window-title': 'windowTitle',
+      'model-window-label': 'modelWindowLabel', 'stack-note': 'stackNote',
+      'footer-note': 'footerNote', 'developed-with': 'developedWith', 'license': 'license'
+    };
+
+    function t(key) { return ui[language][key]; }
+    function copy(item, index) { return item[language][index]; }
+    function infoCopy(item, index) { return item.info[language][index]; }
+
+    function formatTokenCount(valueK) {
+      const value = Math.round(valueK * 1000);
+      const separator = language === 'it' ? '.' : ',';
+      const formatted = String(value).replace(/\B(?=(\d{3})+(?!\d))/g, separator);
+      return `${formatted} ${language === 'it' ? 'token' : 'tokens'}`;
+    }
+
+    function applyLanguage() {
+      document.documentElement.lang = language;
+      document.title = t('documentTitle');
+      Object.entries(staticBindings).forEach(([id, key]) => {
+        document.getElementById(id).textContent = t(key);
+      });
+      document.getElementById('simplification-text').innerHTML = t('simplificationText');
+      const capacity = document.getElementById('capacity');
+      capacity.options[0].textContent = formatTokenCount(200);
+      capacity.options[1].textContent = formatTokenCount(1000);
+    }
+
+    function createControls() {
+      const orderedControls = [...components].sort((a, b) => controlOrder.indexOf(a.id) - controlOrder.indexOf(b.id));
+      switches.innerHTML = orderedControls.map(item => `
+        <div class="switch-row">
+          <input type="checkbox" id="toggle-${item.id}" ${state[item.id] ? 'checked' : ''} ${item.required ? 'disabled' : ''}>
+          <label for="toggle-${item.id}">
+            <strong>${copy(item, 0)}</strong>
+            <span>${copy(item, 1)}</span>
+          </label>
+          <button class="info-button" type="button" aria-label="${t('info')}: ${copy(item, 0)}" aria-expanded="false" aria-controls="info-${item.id}" data-info="${item.id}">i</button>
+          <div class="component-info" id="info-${item.id}" hidden>
+            <p><strong>${t('represents')}:</strong> ${copy(item, 1)}</p>
+            <p><strong>${t('managedBy')}:</strong> ${infoCopy(item, 0)}</p>
+            <p><strong>${t('location')}:</strong> ${infoCopy(item, 1)}</p>
+            <p><strong>${t('presence')}:</strong> ${t(item.required ? 'required' : 'optional')}</p>
+            <p><strong>${t('entersAs')}:</strong> ${infoCopy(item, 2)}</p>
+            <p><strong>${t('visibility')}:</strong> ${infoCopy(item, 3)}</p>
+          </div>
+        </div>
+      `).join('');
+
+      components.filter(item => !item.required).forEach(item => {
+        document.getElementById(`toggle-${item.id}`).addEventListener('change', event => {
+          state[item.id] = event.target.checked;
+          render();
+        });
+      });
+
+      document.querySelectorAll('[data-info]').forEach(button => {
+        button.addEventListener('click', () => {
+          const panel = document.getElementById(`info-${button.dataset.info}`);
+          const willOpen = panel.hidden;
+          panel.hidden = !willOpen;
+          button.setAttribute('aria-expanded', String(willOpen));
+        });
+      });
+    }
+
+    function render() {
+      const active = components
+        .filter(item => state[item.id])
+        .sort((a, b) => stackOrder.indexOf(a.id) - stackOrder.indexOf(b.id));
+      const usedK = active.reduce((sum, item) => sum + item.sizeK, 0);
+      const reserveK = Math.max(capacityK - usedK, 0);
+
+      contextWindow.innerHTML = `
+        <div class="response-reserve">
+          ${t('availableSpace')}: ${formatTokenCount(reserveK)}<br>
+          <span>${t('responseReserve')}</span>
+        </div>
+      ` + active.map(item => `
+        <article class="context-block" style="--block-color:${item.color}">
+          <strong>${copy(item, 0)}</strong>
+          <span class="size">${formatTokenCount(item.sizeK)}</span>
+          <p>${copy(item, 2)}</p>
+        </article>
+      `).join('');
+
+      usedLabel.textContent = formatTokenCount(usedK);
+      document.getElementById('capacity-label').textContent = `/ ${formatTokenCount(capacityK)} ${t('occupied')}`;
+      meter.setAttribute('aria-label', t('meterAria'));
+      meter.setAttribute('aria-valuemax', capacityK * 1000);
+      meter.setAttribute('aria-valuenow', usedK * 1000);
+      meterFill.style.width = `${Math.min((usedK / capacityK) * 100, 100)}%`;
+    }
+
+    document.getElementById('reset').addEventListener('click', () => {
+      components.forEach(item => {
+        state[item.id] = item.initial;
+        const input = document.getElementById(`toggle-${item.id}`);
+        input.checked = item.initial;
+      });
+      render();
+    });
+
+    document.getElementById('language').addEventListener('change', event => {
+      language = event.target.value;
+      applyLanguage();
+      createControls();
+      render();
+    });
+
+    document.getElementById('capacity').addEventListener('change', event => {
+      capacityK = Number(event.target.value);
+      render();
+    });
+
+    applyLanguage();
+    createControls();
+    render();
+  </script>
+</body>
+</html>
