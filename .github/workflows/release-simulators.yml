@@ -50,8 +50,6 @@ jobs:
           - 🍽️ **digestion-simulator.zip** - Digestive system visualization
           - 🌍 **gravity-simulator.zip** - Gravity physics simulation
 
-          > **Note**: Branching Navigator has moved to its own repository: [paolodalprato/branching-navigator](https://github.com/paolodalprato/branching-navigator)
-
           _Auto-generated on every push to main._" \
             --latest \
             release-assets/*.zip

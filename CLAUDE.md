@@ -46,4 +46,4 @@ Check specifically for:
 |------|------|--------|
 | heart | Discrete state (SVG) | Complete |
 | gravity | Continuous physics (Canvas) | Complete |
-| digestion | Discrete state with particles (SVG) | Complete, not yet on GitHub |
+| digestion | Discrete state with particles (SVG) | Complete |
