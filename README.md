@@ -16,6 +16,7 @@ Make learning more accessible through interactive visualizations that allow you 
 | 🌌 [Gravity](./gravity/) | Explore gravitational attraction and emergent behavior from simple physical rules | [Open](https://paolodalprato.github.io/interactive-simulators/gravity/gravity-simulator.html) | [ZIP](https://github.com/paolodalprato/interactive-simulators/releases/latest/download/gravity-simulator.zip) |
 | 🍽️ [Digestion](./digestion/) | Follow food through the digestive system and see how nutrients are absorbed | [Open](https://paolodalprato.github.io/interactive-simulators/digestion/digestion-simulator.html) | [ZIP](https://github.com/paolodalprato/interactive-simulators/releases/latest/download/digestion-simulator.zip) |
 | 🧠 [Context Window](./context-window/) | Explore what enters the context window at the start of a chat | [Open](https://paolodalprato.github.io/interactive-simulators/context-window/context-window-simulator.html) | [ZIP](https://github.com/paolodalprato/interactive-simulators/releases/latest/download/context-window-simulator.zip) |
+| 📷 [Zoom Lens](./zoom-lens/) | How a zoom lens changes the angle of view and how the aperture changes the depth of field | [Open](https://paolodalprato.github.io/interactive-simulators/zoom-lens/zoom-lens-simulator.html) | [ZIP](https://github.com/paolodalprato/interactive-simulators/releases/latest/download/zoom-lens-simulator.zip) |
 
 ## ✨ Common Features
 

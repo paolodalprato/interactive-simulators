@@ -20,7 +20,7 @@ jobs:
           mkdir -p release-assets
 
           # List of simulator directories (add new ones here)
-          SIMULATORS="heart digestion gravity context-window"
+          SIMULATORS="heart digestion gravity context-window zoom-lens"
 
           for dir in $SIMULATORS; do
             if [ -d "$dir" ]; then
@@ -50,6 +50,7 @@ jobs:
           - 🍽️ **digestion-simulator.zip** - Digestive system visualization
           - 🌍 **gravity-simulator.zip** - Gravity physics simulation
           - 🧠 **context-window-simulator.zip** - Initial context window assembly
+          - 📷 **zoom-lens-simulator.zip** - Zoom lens, angle of view and depth of field
 
           _Auto-generated on every push to main._" \
             --latest \

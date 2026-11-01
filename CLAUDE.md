@@ -47,3 +47,4 @@ Check specifically for:
 | heart | Discrete state (SVG) | Complete |
 | gravity | Continuous physics (Canvas) | Complete |
 | digestion | Discrete state with particles (SVG) | Complete |
+| zoom-lens | Continuous parameters (SVG, Anatomy kit) | Complete |
