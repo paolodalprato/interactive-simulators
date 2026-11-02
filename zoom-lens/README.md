@@ -38,14 +38,16 @@ An interactive side view of a 24-70 mm zoom lens on a mirrorless body, cut in ha
 5. Read the values at the bottom right: the ones that change with the selected setting are in bold.
 6. Switch between English and Italian with the **EN** and **IT** buttons.
 
-## 🔬 The Model Behind the Numbers
+## 🔬 The Model Behind the Drawing
 
-- **Optics**: two thin lens groups, a negative front group (−50 mm) and a positive rear group (+40 mm). Their positions are computed so that a distant subject stays focused on the sensor at every focal length.
-- **Angle of view**: full-frame sensor (36 × 24 mm), diagonal angle of view.
-- **Depth of field**: standard hyperfocal formulas with a 0.03 mm circle of confusion and the subject at 2 m from the sensor.
+The simulator is a qualitative representation. It shows how a zoom lens works, not the exact values of a real lens.
+
+- **Optics**: the lens is simplified to two lens groups, a negative front group and a positive rear group, which move along the axis as the zoom ring turns.
+- **Angle of view**: full-frame sensor (36 × 24 mm), diagonal angle of view. These values are the geometry of any 24-70 mm lens on full frame.
+- **Depth of field**: the zone in focus around a subject at 2 m shows how the depth of field changes with the aperture and the focal length.
 - **Scale**: the space in front of the lens is drawn at 1:40 against the lens.
 
-A real 24-70 mm lens has 15 to 20 elements in several groups and a separate focusing group, which are not drawn here. The values are correct for the model, not for a specific commercial lens.
+A real 24-70 mm lens has 15 to 20 elements in several groups and a separate focusing group, which are not drawn here.
 
 ## 🛠️ Technical Details
 
