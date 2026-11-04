@@ -47,7 +47,7 @@ The simulator is a qualitative representation. It shows how a zoom lens works, n
 - **Depth of field**: the zone in focus around a subject at 2 m shows how the depth of field changes with the aperture and the focal length.
 - **Scale**: the space in front of the lens is drawn at 1:40 against the lens.
 
-A real 24-70 mm lens has 15 to 20 elements in several groups and a separate focusing group, which are not drawn here.
+The 24-70 mm f/2.8 lenses for mirrorless cameras by Canon, Nikon and Sony have 14 to 21 elements in several groups and a separate focusing group, which are not drawn here.
 
 ## 🛠️ Technical Details
 
