@@ -8,7 +8,7 @@ An interactive side view of a 24-70 mm zoom lens on a mirrorless body, cut in ha
 
 ## 🎯 What You'll Learn
 
-- How a zoom ring changes the focal length: a cam barrel moves two lens groups along the axis by different amounts
+- How the focal length changes in the model: a rotating cylinder with two slots moves two lens groups along the axis by different amounts
 - How the diagonal angle of view narrows from 84° at 24 mm to 34° at 70 mm
 - How the aperture blades close and widen the zone in focus around a subject at 2 m
 - Why the depth of field depends on the focal length as well as on the f-number
